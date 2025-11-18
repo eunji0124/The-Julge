@@ -1,6 +1,57 @@
-@import 'tailwindcss'; /* tailwindcss/base, components, utilities를 모두 포함하는 방식 */
+@import 'tailwindcss';
+
+@font-face {
+  font-family: 'Spoqa Han Sans Neo';
+  font-weight: 700;
+  font-display: swap;
+  src:
+    local('Spoqa Han Sans Neo Bold'),
+    url('/fonts/woff2/SpoqaHanSansNeo-Bold.woff2') format('woff2'),
+    url('/fonts/woff/SpoqaHanSansNeo-Bold.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Spoqa Han Sans Neo';
+  font-weight: 500;
+  font-display: swap;
+  src:
+    local('Spoqa Han Sans Neo Medium'),
+    url('/fonts/woff2/SpoqaHanSansNeo-Medium.woff2') format('woff2'),
+    url('/fonts/woff/SpoqaHanSansNeo-Medium.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Spoqa Han Sans Neo';
+  font-weight: 400;
+  font-display: swap;
+  src:
+    local('Spoqa Han Sans Neo Regular'),
+    url('/fonts/woff2/SpoqaHanSansNeo-Regular.woff2') format('woff2'),
+    url('/fonts/woff/SpoqaHanSansNeo-Regular.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Spoqa Han Sans Neo';
+  font-weight: 300;
+  font-display: swap;
+  src:
+    local('Spoqa Han Sans Neo Light'),
+    url('/fonts/woff2/SpoqaHanSansNeo-Light.woff2') format('woff2'),
+    url('/fonts/woff/SpoqaHanSansNeo-Light.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Spoqa Han Sans Neo';
+  font-weight: 100;
+  font-display: swap;
+  src:
+    local('Spoqa Han Sans Neo Thin'),
+    url('/fonts/woff2/SpoqaHanSansNeo-Thin.woff2') format('woff2'),
+    url('/fonts/woff/SpoqaHanSansNeo-Thin.woff') format('woff');
+}
 
 :root {
+  /* gray */
   --color-black: #111322;
   --color-gray-50: #7d7986;
   --color-gray-40: #a4a1aa;
@@ -9,19 +60,26 @@
   --color-gray-10: #f2f2f3;
   --color-gray-05: #fafafa;
   --color-white: #ffffff;
+
+  /* red */
   --color-red-40: #ff4040;
   --color-red-30: #ff8d72;
   --color-red-20: #ffaf9b;
   --color-red-10: #ffefe7;
+
+  /* blue */
   --color-blue-20: #0080ff;
   --color-blue-10: #cce6ff;
+
+  /* green */
   --color-green-20: #20481e;
   --color-green-10: #d4f7d4;
+
+  /* kakao */
   --color-kakao: #fee500;
 }
 
 body {
-  /* 기존 body 스타일 유지 */
   background: var(--color-white);
   color: var(--color-black);
   font-family: 'Spoqa Han Sans Neo', sans-serif;

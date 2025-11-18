@@ -1,0 +1,28 @@
+@import 'tailwindcss'; /* tailwindcss/base, components, utilities를 모두 포함하는 방식 */
+
+:root {
+  --color-black: #111322;
+  --color-gray-50: #7d7986;
+  --color-gray-40: #a4a1aa;
+  --color-gray-30: #cbc9cf;
+  --color-gray-20: #e5e4e7;
+  --color-gray-10: #f2f2f3;
+  --color-gray-05: #fafafa;
+  --color-white: #ffffff;
+  --color-red-40: #ff4040;
+  --color-red-30: #ff8d72;
+  --color-red-20: #ffaf9b;
+  --color-red-10: #ffefe7;
+  --color-blue-20: #0080ff;
+  --color-blue-10: #cce6ff;
+  --color-green-20: #20481e;
+  --color-green-10: #d4f7d4;
+  --color-kakao: #fee500;
+}
+
+body {
+  /* 기존 body 스타일 유지 */
+  background: var(--color-white);
+  color: var(--color-black);
+  font-family: 'Spoqa Han Sans Neo', sans-serif;
+}

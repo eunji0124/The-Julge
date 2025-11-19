@@ -56,7 +56,7 @@ const Pagination = ({ total, limit, page, setPage }: PaginationProps) => {
             aria-current={isActive ? 'page' : undefined}
             className={`flex h-[40px] w-[40px] items-center justify-center rounded ${
               isActive
-                ? 'border-[--color-red-30] bg-[--color-red-30] text-white'
+                ? 'border-[var(--color-red-30)] bg-[var(--color-red-30)] text-white'
                 : 'hover:bg-gray-100'
             } `}>
             {i + 1}

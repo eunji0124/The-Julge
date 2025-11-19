@@ -29,6 +29,7 @@ export default [
       globals: {
         React: 'readonly',
         JSX: 'readonly',
+        module: 'readonly',
       },
     },
     plugins: {

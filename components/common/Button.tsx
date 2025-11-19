@@ -21,7 +21,7 @@ const buttonVariants = cva(
         small: 'max-w-[82px] h-[32px] font-normal text-xs',
       },
       disabled: {
-        true: '!bg-gray-40 !border-gray-40 !text-white !cursor-not-allowed pointer-events-none',
+        true: '!bg-gray-40 !border-gray-40 !text-white !cursor-not-allowed',
         false: '',
       },
     },

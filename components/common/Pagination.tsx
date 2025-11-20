@@ -56,10 +56,10 @@ const Pagination = ({ total, limit, page, setPage }: PaginationProps) => {
             key={i + 1}
             onClick={() => setPage(i + 1)}
             aria-current={isActive ? 'page' : undefined}
-            className={`flex h-[40px] w-[40px] items-center justify-center rounded ${
+             className={`flex h-10 w-10 items-center justify-center rounded ${
               isActive
-                ? 'border-[var(--color-red-30)] bg-[var(--color-red-30)] text-white'
-                : 'hover:bg-gray-100'
+                ? 'border-red-30 bg-red-30 text-white'
+                : 'hover:bg-gray-10'
             } `}>
             {i + 1}
           </button>

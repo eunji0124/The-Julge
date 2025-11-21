@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>간단 입력 사이트</title>
+    <style>
+      /* CSS는 아래 2단계 섹션에 있습니다. */
+      body {
+        font-family: Arial, sans-serif;
+        margin: 40px;
+        background-color: #f4f4f9;
+      }
+      .container {
+        max-width: 600px;
+        margin: auto;
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      label,
+      input,
+      button {
+        display: block;
+        width: 100%;
+        margin-bottom: 15px;
+      }
+      input {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+      button {
+        background-color: #5cb85c;
+        color: white;
+        padding: 10px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      button:hover {
+        background-color: #4cae4c;
+      }
+      #output {
+        margin-top: 20px;
+        padding: 15px;
+        border: 1px solid #ddd;
+        background-color: #e9ecef;
+        border-radius: 4px;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>📝 사용자 정보 입력</h1>
+
+      <form id="inputForm">
+        <label for="nameInput">이름을 입력하세요:</label>
+        <input type="text" id="nameInput" name="name" required />
+
+        <label for="ageInput">나이를 입력하세요:</label>
+        <input type="number" id="ageInput" name="age" min="0" required />
+
+        <button type="submit">입력 내용 확인</button>
+      </form>
+
+      <hr />
+
+      <h2>결과 출력</h2>
+      <div id="output">여기에 입력된 정보가 표시됩니다.</div>
+    </div>
+
+    <script>
+      // JavaScript는 아래 3단계 섹션에 있습니다.
+      document
+        .getElementById('inputForm')
+        .addEventListener('submit', function (event) {
+          // 폼의 기본 제출 동작을 막습니다 (페이지 새로고침 방지)
+          event.preventDefault();
+
+          // 입력 필드의 값을 가져옵니다.
+          const name = document.getElementById('nameInput').value;
+          const age = document.getElementById('ageInput').value;
+
+          // 출력할 내용을 만듭니다.
+          const outputText = `
+                ⭐ 입력 내용 ⭐
+                이름: ${name}
+                나이: ${age} 세
+            `;
+
+          // HTML 페이지의 output 영역에 내용을 표시합니다.
+          document.getElementById('output').textContent = outputText;
+
+          // 선택적으로 폼을 초기화합니다.
+          // event.target.reset();
+        });
+    </script>
+  </body>
+</html>

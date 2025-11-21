@@ -76,7 +76,7 @@ export const postClasses = {
     {
       variants: {
         isActive: {
-          true: 'fill-[var(--color-red-40)] text-[var(--color-red-40)] ',
+          true: 'fill-[var(--color-red-40)] text-[var(--color-red-40)]',
           false: 'fill-[var(--color-gray-30)] text-[var(--color-gray-30)]',
         },
       },

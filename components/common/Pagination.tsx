@@ -41,13 +41,15 @@ const Pagination = ({ total, limit, page, setPage }: PaginationProps) => {
   if (numPages <= 1) return null;
 
   return (
-    <nav className="mt-4 flex items-center gap-2">
+    <nav className="mt-4 flex items-center justify-center gap-1 sm:gap-2">
+      {/* Prev */}
       <button
         onClick={() => setPage(page - 1)}
         disabled={page === 1}
-        className={`flex h-[40px] w-[40px] items-center justify-center rounded ${page === 1 ? 'cursor-default opacity-40' : 'hover:bg-gray-100'} `}>
+        className={`flex h-[32px] w-[32px] items-center justify-center rounded sm:h-[40px] sm:w-[40px] ${page === 1 ? 'cursor-default opacity-40' : 'hover:bg-gray-100'} `}>
         &lt;
       </button>
+
       {/* Page Numbers */}
       {Array.from({ length: numPages }, (_, i) => {
         const isActive = page === i + 1;
@@ -56,7 +58,7 @@ const Pagination = ({ total, limit, page, setPage }: PaginationProps) => {
             key={i + 1}
             onClick={() => setPage(i + 1)}
             aria-current={isActive ? 'page' : undefined}
-             className={`flex h-10 w-10 items-center justify-center rounded ${
+            className={`flex h-[32px] w-[32px] items-center justify-center rounded sm:h-[40px] sm:w-[40px] ${
               isActive
                 ? 'border-red-30 bg-red-30 text-white'
                 : 'hover:bg-gray-10'
@@ -66,10 +68,11 @@ const Pagination = ({ total, limit, page, setPage }: PaginationProps) => {
         );
       })}
 
+      {/* Next */}
       <button
         onClick={() => setPage(page + 1)}
         disabled={page === numPages}
-        className={`flex h-[40px] w-[40px] items-center justify-center rounded ${page === numPages ? 'cursor-default opacity-40' : 'hover:bg-gray-100'} `}>
+        className={`flex h-[32px] w-[32px] items-center justify-center rounded sm:h-[40px] sm:w-[40px] ${page === numPages ? 'cursor-default opacity-40' : 'hover:bg-gray-100'} `}>
         &gt;
       </button>
     </nav>

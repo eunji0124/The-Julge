@@ -50,13 +50,17 @@ interface Column {
   fixed?: 'right';
 }
 
-interface TableProps {
+interface TableProps<T extends Record<string, React.ReactNode>> {
   columns: Column[];
-  data: Record<string, React.ReactNode>[];
-  rowKey?: string;
+  data: T[];
+  rowKey?: keyof T;
 }
 
-const Table = ({ columns, data, rowKey = 'id' }: TableProps) => {
+const Table = <T extends Record<string, React.ReactNode>>({
+  columns,
+  data,
+  rowKey = 'id' as keyof T,
+}: TableProps<T>) => {
   const [page, setPage] = useState(1);
 
   // useMemo로 displayData 메모이제이션
@@ -77,7 +81,7 @@ const Table = ({ columns, data, rowKey = 'id' }: TableProps) => {
     return WIDTH_CLASSES[col.key] || 'w-auto';
   };
 
-  // 헤더 렌더링 헬퍼 함수
+  // 헤더 렌더링 함수
   const renderThead = (cols: Column[]) => (
     <thead>
       <tr className="bg-red-10">
@@ -92,7 +96,7 @@ const Table = ({ columns, data, rowKey = 'id' }: TableProps) => {
     </thead>
   );
 
-  // 바디 렌더링 헬퍼 함수
+  // 바디 렌더링 함수
   const renderTbody = (cols: Column[]) => (
     <tbody>
       {displayData.map((row, idx) => {
@@ -113,15 +117,20 @@ const Table = ({ columns, data, rowKey = 'id' }: TableProps) => {
     </tbody>
   );
 
+  // 테이블 렌더링 함수
+  const renderTable = (cols: Column[], className: string = '') => (
+    <table className={`border-collapse ${className}`}>
+      {renderThead(cols)}
+      {renderTbody(cols)}
+    </table>
+  );
+
   return (
     <div className="@container mx-auto w-full max-w-[964px] font-normal text-black">
       <div className="border-gray-20 overflow-hidden rounded-xl border">
         {/* 부모 요소의 크기가 964px 이상 */}
         <div className="hidden @[964px]:block">
-          <table className="w-full border-collapse">
-            {renderThead(columns)}
-            {renderTbody(columns)}
-          </table>
+          {renderTable(columns, 'w-full')}
         </div>
 
         {/* 부모 요소의 크기가 964px 미만 */}
@@ -129,19 +138,13 @@ const Table = ({ columns, data, rowKey = 'id' }: TableProps) => {
           <div className="flex overflow-hidden rounded-xl">
             {/* 스크롤 컬럼 */}
             <div className="overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [-webkit-scrollbar]:hidden">
-              <table className="border-collapse">
-                {renderThead(scrollableColumns)}
-                {renderTbody(scrollableColumns)}
-              </table>
+              {renderTable(scrollableColumns)}
             </div>
 
             {/* 고정된 오른쪽 컬럼 */}
             {rightFixedColumns.length > 0 && (
               <div className="border-gray-20 border-l bg-white">
-                <table className="border-collapse">
-                  {renderThead(rightFixedColumns)}
-                  {renderTbody(rightFixedColumns)}
-                </table>
+                {renderTable(rightFixedColumns)}
               </div>
             )}
           </div>

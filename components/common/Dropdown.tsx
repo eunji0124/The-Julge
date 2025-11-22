@@ -1,3 +1,41 @@
+/**
+ * 사용 예제
+ *
+ * import { useState, useCallback } from 'react';
+ * import Dropdown from './Dropdown';
+ *
+ * const ParentComponent = () => {
+ *   const [open, setOpen] = useState(false);
+ *   const [selected, setSelected] = useState<string | null>(null);
+ *
+ *   const handleClose = useCallback(() => {
+ *     setOpen(false);
+ *   }, []);
+ *
+ *   const handleSelect = (value: string) => {
+ *     setSelected(value);
+ *     setOpen(false);
+ *   };
+ *
+ *   return (
+ *     <div className="relative">
+ *       <button onClick={() => setOpen((prev) => !prev)}>
+ *         {selected ?? '메뉴 선택'}
+ *       </button>
+ *
+ *       {open && (
+ *         <Dropdown
+ *           items={['React', 'Vue', 'Svelte']}
+ *           onSelect={handleSelect}
+ *           onClose={handleClose}
+ *         />
+ *       )}
+ *     </div>
+ *   );
+ * };
+ *
+ */
+
 import { useEffect, useRef } from 'react';
 
 import { cn } from '@/lib/utils';

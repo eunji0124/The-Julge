@@ -1,12 +1,16 @@
+import Image from 'next/image';
+
 import { PostImageProps } from '@/types/post';
 
 const PostImage = ({ imageUrl, name, isGray, overlayText }: PostImageProps) => {
   return (
-    <div className="relative h-[84px] max-w-[280px] sm:h-[160px]">
-      <img
+    <div className="relative h-[84px] max-w-[280px] overflow-hidden rounded-[12px] sm:h-[160px]">
+      <Image
         src={imageUrl}
         alt={`${name} 사진`}
-        className="h-full w-full rounded-[12px] object-cover"
+        fill
+        sizes="(max-width: 640px) 280px, 320px"
+        className="object-cover"
       />
       {!isGray && overlayText && (
         <div className="absolute inset-0 flex items-center justify-center rounded-[12px] bg-black/70">

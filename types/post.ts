@@ -22,3 +22,16 @@ export interface PostWageProps extends BasePostProps {
   wage: number;
   getBadgeColor: (percentage: number, isBackground?: boolean) => string;
 }
+
+export interface PostImageProps {
+  imageUrl: string;
+  name: string;
+  isGray: boolean;
+  overlayText?: string;
+}
+
+export interface BadgeProps {
+  percentage: number;
+  isGray: boolean;
+  getBadgeColor: (percentage: number, isBackground?: boolean) => string;
+}

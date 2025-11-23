@@ -1,16 +1,6 @@
-interface PostImageProps {
-  imageUrl: string;
-  name: string;
-  isGray: boolean;
-  overlayText?: string;
-}
+import { PostImageProps } from '@/types/post';
 
-export const PostImage = ({
-  imageUrl,
-  name,
-  isGray,
-  overlayText,
-}: PostImageProps) => {
+const PostImage = ({ imageUrl, name, isGray, overlayText }: PostImageProps) => {
   return (
     <div className="relative h-[84px] max-w-[280px] sm:h-[160px]">
       <img
@@ -28,3 +18,4 @@ export const PostImage = ({
     </div>
   );
 };
+export default PostImage;

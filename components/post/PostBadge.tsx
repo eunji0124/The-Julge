@@ -1,14 +1,9 @@
 import { postClasses } from '@/lib/utils/postClasses';
+import { BadgeProps } from '@/types/post';
 
 import BadgeArrow from '../icons/BadgeArrow';
 
-interface Props {
-  percentage: number;
-  isGray: boolean;
-  getBadgeColor: (percentage: number, isBackground?: boolean) => string;
-}
-
-const PostBadge = ({ percentage, isGray, getBadgeColor }: Props) => (
+const PostBadge = ({ percentage, isGray, getBadgeColor }: BadgeProps) => (
   <>
     <span
       className={`${postClasses.badge({ isActive: isGray })} ${getBadgeColor(percentage, true)}`}>

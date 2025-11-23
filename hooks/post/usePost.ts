@@ -20,12 +20,12 @@ export const usePost = ({
   );
 
   // 비활성화 상태이거나 지난 공고
-  const isGray = isActive && !workInfo.isExpired;
+  const isColor = isActive && !workInfo.isExpired;
   const overlayText = workInfo.isExpired ? '지난 공고' : '마감 완료';
 
   // Badge 색상
   const getBadgeColor = (percentage: number, isBackground = true) => {
-    if (!isGray) return '';
+    if (!isColor) return '';
     const levels = [
       { limit: 50, color: 'red-40' },
       { limit: 30, color: 'red-30' },
@@ -39,5 +39,5 @@ export const usePost = ({
       : `text-[var(--color-${matched.color})]`;
   };
 
-  return { workInfo, isGray, overlayText, getBadgeColor };
+  return { workInfo, isColor, overlayText, getBadgeColor };
 };

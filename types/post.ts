@@ -1,6 +1,6 @@
 // 공통으로 쓰이는 props
 export interface BasePostProps {
-  isGray: boolean;
+  isColor: boolean;
   percentage?: number;
 }
 
@@ -26,12 +26,12 @@ export interface PostWageProps extends BasePostProps {
 export interface PostImageProps {
   imageUrl: string;
   name: string;
-  isGray: boolean;
+  isColor: boolean;
   overlayText?: string;
 }
 
 export interface BadgeProps {
   percentage: number;
-  isGray: boolean;
+  isColor: boolean;
   getBadgeColor: (percentage: number, isBackground?: boolean) => string;
 }

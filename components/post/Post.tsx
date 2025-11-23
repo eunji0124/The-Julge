@@ -26,7 +26,7 @@ const Post = ({
   isActive = true,
   percentage,
 }: StoreInfo) => {
-  const { workInfo, isGray, overlayText, getBadgeColor } = usePost({
+  const { workInfo, isColor, overlayText, getBadgeColor } = usePost({
     startAt,
     workTime,
     isActive,
@@ -38,19 +38,19 @@ const Post = ({
       <PostImage
         imageUrl={imageUrl}
         name={name}
-        isGray={isGray}
+        isColor={isColor}
         overlayText={overlayText}
       />
 
       {/* 정보 영역 - 근무시간, 가게위치, 시급 */}
       <div className="flex flex-col gap-2">
-        <h2 className={postClasses.title({ isActive: isGray })}>{name}</h2>
-        <PostTime workInfo={workInfo} isGray={isGray} />
-        <PostLocation location={location} isGray={isGray} />
+        <h2 className={postClasses.title({ isActive: isColor })}>{name}</h2>
+        <PostTime workInfo={workInfo} isColor={isColor} />
+        <PostLocation location={location} isColor={isColor} />
         <PostWage
           wage={wage}
           percentage={percentage}
-          isGray={isGray}
+          isColor={isColor}
           getBadgeColor={getBadgeColor}
         />
       </div>

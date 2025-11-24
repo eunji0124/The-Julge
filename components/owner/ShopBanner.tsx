@@ -21,8 +21,8 @@ import PostImage from '../post/PostImage';
 import PostLocation from '../post/PostLocation';
 import 'tippy.js/dist/tippy.css';
 
-interface StoreInfo {
-  cartegory:
+interface ShopBannerProps {
+  category:
     | '한식'
     | '중식'
     | '일식'

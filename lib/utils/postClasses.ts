@@ -10,7 +10,7 @@ export const postClasses = {
       variants: {
         isActive: {
           true: 'text-[var(--color-black)]',
-          false: 'text-[var(--color-gray-30§)]',
+          false: 'text-[var(--color-gray-30)]',
         },
       },
       defaultVariants: {

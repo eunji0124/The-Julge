@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 
  return (
     <div className="mx-5 my-5 inline-flex gap-4">
-      <Badge status="">대기중</Badge>
+      <Badge>대기중</Badge>
       <Badge status="accepted">승인됨</Badge>
       <Badge status="accepted">승인 완료</Badge>
       <Badge status="rejected">거절</Badge>
@@ -25,7 +25,7 @@ import { cn } from '@/lib/utils';
  */
 
 type BadgeVariant = 'primary' | 'secondary' | 'danger' | 'filter';
-type BadgeStatus = '' | 'accepted' | 'rejected' | 'canceled';
+type BadgeStatus = 'accepted' | 'rejected' | 'canceled';
 
 // 공통 반응형 스타일
 const commonResponsiveStyles =
@@ -64,13 +64,20 @@ const Badge: React.FC<BadgeProps> = ({
   ...props
 }) => {
   // status를 variant로 매핑
-  const getVariantFromStatus = (): BadgeVariant => {
-    if (status === 'accepted') return 'secondary';
-    if (status === 'rejected' || status === 'canceled') return 'danger';
-    return variant || `primary`;
+  const getVariantFromStatus = (statusToMap: BadgeStatus): BadgeVariant => {
+    switch (statusToMap) {
+      case 'accepted':
+        return 'secondary';
+      case 'rejected':
+      case 'canceled':
+        return 'danger';
+      default:
+        return 'primary';
+    }
   };
 
-  const finalVariant = status ? getVariantFromStatus() : variant;
+  const finalVariant =
+    status !== undefined ? getVariantFromStatus(status) : variant;
 
   return (
     <div

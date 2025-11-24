@@ -1,5 +1,9 @@
 import { useId } from 'react';
 
+import { cva } from 'class-variance-authority';
+
+import { cn } from '@/lib/utils';
+
 /**
  * @description
  * - text, email, password, number, select 타입 지원
@@ -113,13 +117,25 @@ interface InputProps {
 }
 
 // 공통 스타일 함수
-const inputVariants = ({ error }: { error: boolean }) => {
-  return `w-full text-base h-[58px] px-4 py-3 border rounded-lg transition-colors outline-none ${
-    error
-      ? 'border-red-40 focus:border-red-40'
-      : 'border-gray-30 focus:border-blue-20'
-  }`;
-};
+const inputVariants = cva(
+  'w-full text-base h-[58px] px-4 py-3 border rounded-lg transition-colors outline-none',
+  {
+    variants: {
+      error: {
+        true: 'border-red-40 focus:border-red-40',
+        false: 'border-gray-30 focus:border-blue-20',
+      },
+      hasRightElement: {
+        true: 'pr-10',
+        false: '',
+      },
+    },
+    defaultVariants: {
+      error: false,
+      hasRightElement: false,
+    },
+  }
+);
 
 // 검증 함수
 const validateEmail = (email: string): boolean => {
@@ -152,7 +168,7 @@ const Input = ({
   const inputId = id || generatedId;
   const errorId = `${inputId}-error`;
 
-  // onBlur 시 검증
+  // onBlur 검증
   const handleBlur = () => {
     if (!onValidate) return;
 
@@ -171,11 +187,9 @@ const Input = ({
       errorMessage = isValid ? '' : '잘못된 이메일입니다.';
     } else if (type === 'password') {
       if (matchValue !== undefined) {
-        // 비밀번호 확인
         isValid = validatePasswordMatch(matchValue, value);
         errorMessage = isValid ? '' : '비밀번호가 일치하지 않습니다.';
       } else {
-        // 비밀번호 길이 검사
         isValid = validatePassword(value);
         errorMessage = isValid ? '' : '8자 이상 입력해 주세요.';
       }
@@ -191,7 +205,7 @@ const Input = ({
   };
 
   return (
-    <div className={`w-full ${className ?? ''}`}>
+    <div className={cn('w-full', className)}>
       {label && (
         <label
           htmlFor={inputId}
@@ -214,17 +228,21 @@ const Input = ({
           aria-invalid={Boolean(error)}
           aria-haspopup={type === 'select' ? 'listbox' : undefined}
           aria-expanded={type === 'select' ? isDropdownOpen : undefined}
-          className={`${inputVariants({
-            error: Boolean(error),
-          })} ${type === 'select' || unit ? 'pr-10' : ''}`}
+          className={cn(
+            inputVariants({
+              error: Boolean(error),
+              hasRightElement: type === 'select' || Boolean(unit),
+            })
+          )}
         />
 
         {/* Select 타입 화살표*/}
         {type === 'select' && (
           <svg
-            className={`pointer-events-none absolute top-1/2 right-5 h-2 w-3 -translate-y-1/2 transition-transform ${
-              isDropdownOpen ? 'rotate-180' : ''
-            }`}
+            className={cn(
+              'pointer-events-none absolute top-1/2 right-5 h-2 w-3 -translate-y-1/2 transition-transform',
+              isDropdownOpen && 'rotate-180'
+            )}
             fill="#111322"
             viewBox="0 0 13 8"
             aria-hidden="true">

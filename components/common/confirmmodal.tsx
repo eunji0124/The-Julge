@@ -1,4 +1,4 @@
-"use client";
+
 
 import BaseModal from "./basemodal";
 import Image from "next/image";

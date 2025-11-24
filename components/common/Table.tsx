@@ -158,12 +158,14 @@ const Table = <T extends Record<string, React.ReactNode>>({
         </div>
 
         {/* Pagination 컴포넌트 */}
-        <Pagination
-          total={data.length}
-          limit={LIMIT}
-          page={page}
-          setPage={setPage}
-        />
+        <div className="w-full pt-3 pr-3 pb-3 pl-[11px] md:px-3 md:py-2 lg:px-3 lg:py-2">
+          <Pagination
+            total={data.length}
+            limit={LIMIT}
+            page={page}
+            setPage={setPage}
+          />
+        </div>
       </div>
     </div>
   );

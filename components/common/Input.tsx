@@ -156,8 +156,9 @@ const Input = ({
   const handleBlur = () => {
     if (!onValidate) return;
 
-    if (!value) {
-      onValidate(true, '');
+    // 빈 값 처리
+    if (value.trim() === '') {
+      onValidate(false, '값을 입력해 주세요.');
       return;
     }
 
@@ -178,8 +179,6 @@ const Input = ({
         isValid = validatePassword(value);
         errorMessage = isValid ? '' : '8자 이상 입력해 주세요.';
       }
-    } else {
-      return;
     }
 
     onValidate(isValid, errorMessage);

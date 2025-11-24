@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils';
       <Badge status="accepted">승인 완료</Badge>
       <Badge status="rejected">거절</Badge>
       <Badge status="canceled">취소</Badge>
-      <Badge variant="filter" removable onRemove={() => console.log('removed')}>
+      <Badge variant="filter" onRemove={() => console.log('removed')}>
         서울시 강남구
       </Badge>
     </div>
@@ -49,9 +49,8 @@ const badgeVariants = cva(
 );
 
 interface BadgeProps
-  extends HTMLAttributes<HTMLSpanElement>,
+  extends HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof badgeVariants> {
-  removable?: boolean;
   onRemove?: () => void;
   status?: BadgeStatus;
 }
@@ -59,7 +58,6 @@ interface BadgeProps
 const Badge: React.FC<BadgeProps> = ({
   children,
   variant = 'primary',
-  removable = false,
   onRemove,
   className = '',
   status,
@@ -79,7 +77,7 @@ const Badge: React.FC<BadgeProps> = ({
       className={cn(badgeVariants({ variant: finalVariant }), className)}
       {...props}>
       <span>{children}</span>
-      {removable && (
+      {onRemove && (
         <button
           type="button"
           onClick={onRemove}

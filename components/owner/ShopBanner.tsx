@@ -56,7 +56,7 @@ const ShopBanner = ({
         <div>
           {/* 카테고리 */}
           <span className="text-[16px] leading-[20px] font-[700] tracking-[0%] text-[var(--color-red-50)]">
-            {cartegory}
+            {category}
           </span>
 
           <div className="h-[8px]" />

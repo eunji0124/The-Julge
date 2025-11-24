@@ -3,12 +3,9 @@ import Link from 'next/link';
 /**
  * AuthRedirect 사용 예제
  *
- * const Ex = () => {
- *   return (
- *     <AuthRedirect variant="login" />
- *     <AuthRedirect variant="signup" />
- *   );
- * };
+ * @example
+ *  <AuthRedirect variant="login" />
+ *  <AuthRedirect variant="signup" />
  *
  * @note
  * - 부모 요소의 너비에 꽉 차도록 설정됨 (w-full)

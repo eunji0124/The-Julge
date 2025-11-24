@@ -1,62 +1,69 @@
+import { useId } from 'react';
+
 /**
- @description
+ * @description
  * - text, email, password, number, select 타입 지원
  * - email: onBlur 시 형식 검사
  * - password: onBlur 시 길이 검사 (최소 8자) 또는 일치 검사
  * - select: 부모에서 Dropdown 제어, onToggleDropdown과 isDropdownOpen으로 연동
  * - number: unit prop으로 단위 표시
- * - 에러 상태는 부모에서 관리 (상태 끌어올리기 패턴)
+ * - 에러 상태는 부모에서 관리
+ * - label prop으로 접근성 향상 (htmlFor, id 자동 연결)
  *
  * @example
  * // 이메일
  * const [email, setEmail] = useState('');
  * const [emailError, setEmailError] = useState('');
- * 
- * <Input 
- *   type="email" 
- *   value={email} 
+ *
+ * <Input
+ *   type="email"
+ *   label="이메일"
+ *   value={email}
  *   onChange={setEmail}
  *   error={emailError}
  *   onValidate={(isValid, message) => setEmailError(message)}
- *   placeholder="이메일" 
+ *   placeholder="example@email.com"
  * />
  *
  * // 비밀번호
  * const [password, setPassword] = useState('');
  * const [passwordError, setPasswordError] = useState('');
- * 
- * <Input 
- *   type="password" 
- *   value={password} 
+ *
+ * <Input
+ *   type="password"
+ *   label="비밀번호"
+ *   value={password}
  *   onChange={setPassword}
  *   error={passwordError}
  *   onValidate={(isValid, message) => setPasswordError(message)}
- *   placeholder="비밀번호" 
+ *   placeholder="8자 이상 입력"
  * />
  *
  * // 비밀번호 확인
  * const [passwordConfirm, setPasswordConfirm] = useState('');
  * const [passwordConfirmError, setPasswordConfirmError] = useState('');
- * 
+ *
  * <Input
  *   type="password"
+ *   label="비밀번호 확인"
  *   value={passwordConfirm}
  *   onChange={setPasswordConfirm}
  *   matchValue={password}
  *   error={passwordConfirmError}
  *   onValidate={(isValid, message) => setPasswordConfirmError(message)}
- *   placeholder="비밀번호 확인"
+ *   placeholder="비밀번호를 다시 입력"
  * />
  *
  * // 셀렉트 (Dropdown 컴포넌트와 함께 사용)
  * import Dropdown from '@/components/Dropdown';
- * 
+ *
  * const [category, setCategory] = useState('');
  * const [dropdownOpen, setDropdownOpen] = useState(false);
- * 
- * <div className="relative"> // relative필수
+ * //relative 필수
+ * <div className="relative">
  *   <Input
  *     type="select"
+ *     label="카테고리"
  *     value={category}
  *     onChange={setCategory}
  *     onToggleDropdown={() => setDropdownOpen(!dropdownOpen)}
@@ -78,17 +85,20 @@
  *
  * // 시급
  * const [wage, setWage] = useState('');
- * 
- * <Input 
- *   type="number" 
- *   value={wage} 
- *   onChange={setWage} 
- *   unit="원" 
- *   placeholder="시급" 
+ *
+ * <Input
+ *   type="number"
+ *   label="시급"
+ *   value={wage}
+ *   onChange={setWage}
+ *   unit="원"
+ *   placeholder="시급을 입력하세요"
  * />
  */
 
 interface InputProps {
+  id?: string;
+  label?: string;
   type?: 'text' | 'email' | 'password' | 'number' | 'select';
   value: string;
   onChange?: (value: string) => void;
@@ -123,6 +133,8 @@ const validatePasswordMatch = (password: string, confirm: string): boolean =>
   password === confirm;
 
 const Input = ({
+  id,
+  label,
   type = 'text',
   value,
   onChange,
@@ -135,31 +147,42 @@ const Input = ({
   error,
   onValidate,
 }: InputProps) => {
+  // ID 생성
+  const generatedId = useId();
+  const inputId = id || generatedId;
+  const errorId = `${inputId}-error`;
+
   // onBlur 시 검증
   const handleBlur = () => {
+    if (!onValidate) return;
+
     if (!value) {
-      onValidate?.(true, '');
+      onValidate(true, '');
       return;
     }
 
+    let isValid = true;
+    let errorMessage = '';
+
     // 타입별 검증
     if (type === 'email') {
-      const isValid = validateEmail(value);
-      const errorMessage = isValid ? '' : '잘못된 이메일입니다.';
-      onValidate?.(isValid, errorMessage);
+      isValid = validateEmail(value);
+      errorMessage = isValid ? '' : '잘못된 이메일입니다.';
     } else if (type === 'password') {
       if (matchValue !== undefined) {
         // 비밀번호 확인
-        const isValid = validatePasswordMatch(matchValue, value);
-        const errorMessage = isValid ? '' : '비밀번호가 일치하지 않습니다.';
-        onValidate?.(isValid, errorMessage);
+        isValid = validatePasswordMatch(matchValue, value);
+        errorMessage = isValid ? '' : '비밀번호가 일치하지 않습니다.';
       } else {
         // 비밀번호 길이 검사
-        const isValid = validatePassword(value);
-        const errorMessage = isValid ? '' : '8자 이상 입력해 주세요.';
-        onValidate?.(isValid, errorMessage);
+        isValid = validatePassword(value);
+        errorMessage = isValid ? '' : '8자 이상 입력해 주세요.';
       }
+    } else {
+      return;
     }
+
+    onValidate(isValid, errorMessage);
   };
 
   const handleClick = () => {
@@ -170,8 +193,17 @@ const Input = ({
 
   return (
     <div className={`w-full ${className ?? ''}`}>
+      {label && (
+        <label
+          htmlFor={inputId}
+          className="mb-2 block text-sm font-medium text-gray-700">
+          {label}
+        </label>
+      )}
+
       <div className="relative">
         <input
+          id={inputId}
           type={type === 'select' ? 'text' : type}
           readOnly={type === 'select'}
           value={value}
@@ -179,6 +211,10 @@ const Input = ({
           onChange={(e) => onChange?.(e.target.value)}
           onBlur={handleBlur}
           placeholder={placeholder}
+          aria-describedby={error ? errorId : undefined}
+          aria-invalid={Boolean(error)}
+          aria-haspopup={type === 'select' ? 'listbox' : undefined}
+          aria-expanded={type === 'select' ? isDropdownOpen : undefined}
           className={`${inputVariants({
             error: Boolean(error),
           })} ${type === 'select' || unit ? 'pr-10' : ''}`}
@@ -187,25 +223,32 @@ const Input = ({
         {/* Select 타입 화살표*/}
         {type === 'select' && (
           <svg
-            className={`pointer-events-none absolute top-1/2 right-5 h-2 w-3 -translate-y-1/2 text-gray-500 transition-transform ${
+            className={`pointer-events-none absolute top-1/2 right-5 h-2 w-3 -translate-y-1/2 transition-transform ${
               isDropdownOpen ? 'rotate-180' : ''
             }`}
             fill="#111322"
-            viewBox="0 0 13 8">
+            viewBox="0 0 13 8"
+            aria-hidden="true">
             <path d="M7.00324 7.7268L12.6032 1.3268C13.0558 0.809537 12.6885 0 12.0012 0L0.801179 0C0.113852 0 -0.25349 0.809537 0.199118 1.3268L5.79912 7.7268C6.11785 8.09107 6.68451 8.09107 7.00324 7.7268Z" />
           </svg>
         )}
 
         {/* Number 타입 단위 표시 */}
         {unit && (
-          <span className="absolute top-1/2 right-5 -translate-y-1/2 text-sm text-black">
+          <span
+            className="absolute top-1/2 right-5 -translate-y-1/2 text-sm text-black"
+            aria-hidden="true">
             {unit}
           </span>
         )}
       </div>
 
       {/* 에러 메시지 */}
-      {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+      {error && (
+        <p id={errorId} className="text-red-40 mt-1 text-sm" role="alert">
+          {error}
+        </p>
+      )}
     </div>
   );
 };

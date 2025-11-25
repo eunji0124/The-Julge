@@ -1,6 +1,7 @@
 import axios, {
   AxiosError,
   AxiosResponse,
+  AxiosRequestConfig,
   InternalAxiosRequestConfig,
 } from 'axios';
 
@@ -47,6 +48,8 @@ apiClient.interceptors.response.use(
 
     if (error.response?.status === 401) {
       console.error('인증 에러');
+      // TODO: 토큰 갱신 또는 로그인 페이지로 리디렉션하는 로직을 구현
+      // 예: window.location.assign('/login');
     }
 
     return Promise.reject(error);
@@ -62,36 +65,35 @@ apiClient.interceptors.response.use(
  * const result = await api.post<SignupResponse>('/users', data);
  */
 export const api = {
-  get: async <T = unknown>(url: string, config = {}): Promise<T> => {
-    const response = await apiClient.get(url, config);
-    return response as T;
+  get: <T = unknown>(
+    url: string,
+    config: AxiosRequestConfig = {}
+  ): Promise<T> => {
+    return apiClient.get<T>(url, config) as Promise<T>;
   },
 
-  post: async <T = unknown>(
+  post: <T = unknown>(
     url: string,
     data?: unknown,
-    config = {}
+    config: AxiosRequestConfig = {}
   ): Promise<T> => {
-    const response = await apiClient.post(url, data, config);
-    return response as T;
+    return apiClient.post<T>(url, data, config) as Promise<T>;
   },
 
-  put: async <T = unknown>(
+  put: <T = unknown>(
     url: string,
     data?: unknown,
-    config = {}
+    config: AxiosRequestConfig = {}
   ): Promise<T> => {
-    const response = await apiClient.put(url, data, config);
-    return response as T;
+    return apiClient.put<T>(url, data, config) as Promise<T>;
   },
 
-  patch: async <T = unknown>(
+  patch: <T = unknown>(
     url: string,
     data?: unknown,
-    config = {}
+    config: AxiosRequestConfig = {}
   ): Promise<T> => {
-    const response = await apiClient.patch(url, data, config);
-    return response as T;
+    return apiClient.patch<T>(url, data, config) as Promise<T>;
   },
 };
 

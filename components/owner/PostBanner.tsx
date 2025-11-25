@@ -43,7 +43,7 @@ const PostBanner = ({
   imageUrl,
   description,
   percentage,
-}: PostBannerInfo) => {
+}: PostBannerProps) => {
   const { workInfo, isColor, getBadgeColor } = usePost({
     startAt,
     workTime,

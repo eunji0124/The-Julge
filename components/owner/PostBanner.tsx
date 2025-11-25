@@ -23,7 +23,7 @@ import PostTime from '../post/PostTime';
 import PostWage from '../post/PostWage';
 import 'tippy.js/dist/tippy.css';
 
-interface PostBannerInfo {
+interface PostBannerProps {
   name: string;
   startAt: string;
   workTime: number;

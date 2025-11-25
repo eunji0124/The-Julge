@@ -35,13 +35,14 @@ const Post = ({
   return (
     <div className={postClasses.container()}>
       {/* 이미지 + 오버레이 */}
-      <PostImage
-        imageUrl={imageUrl}
-        name={name}
-        isColor={isColor}
-        overlayText={overlayText}
-      />
-
+      <div className="h-[84px] max-w-[280px] sm:h-[160px]">
+        <PostImage
+          imageUrl={imageUrl}
+          name={name}
+          isColor={isColor}
+          overlayText={overlayText}
+        />
+      </div>
       {/* 정보 영역 - 근무시간, 가게위치, 시급 */}
       <div className="flex flex-col gap-2">
         <h2 className={postClasses.title({ isActive: isColor })}>{name}</h2>

@@ -23,22 +23,37 @@ export interface ApiLink {
 }
 
 /**
+ * 사용자 유형
+ * - EMPLOYEE: 직원 (알바생)
+ * - EMPLOYER: 고용주 (사장님)
+ */
+export enum UserType {
+  EMPLOYEE = 'employee',
+  EMPLOYER = 'employer',
+}
+
+/**
+ * 사용자 정보
+ */
+export interface User {
+  id: string;
+  email: string;
+  type: UserType;
+}
+
+/**
  * 회원가입 요청 타입
  */
 export interface SignupRequest {
   email: string;
   password: string;
-  type: 'employee' | 'employer';
+  type: UserType;
 }
 
 /**
  * 회원가입 응답 타입
  */
 export interface SignupResponse {
-  item: {
-    id: string;
-    email: string;
-    type: 'employee' | 'employer';
-  };
+  item: User;
   links: ApiLink[];
 }

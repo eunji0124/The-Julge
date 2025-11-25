@@ -184,7 +184,7 @@ const Input = ({
     // 타입별 검증
     if (type === 'email') {
       isValid = validateEmail(value);
-      errorMessage = isValid ? '' : '잘못된 이메일입니다.';
+      errorMessage = isValid ? '' : '이메일 형식으로 작성해 주세요.';
     } else if (type === 'password') {
       if (matchValue !== undefined) {
         isValid = validatePasswordMatch(matchValue, value);

@@ -1,6 +1,6 @@
 {
   /* <ShopBanner
-cartegory={'카페'}
+category={'카페'}
 name={'도토리 카페'}
 location={'성수동'}
 imageUrl={
@@ -43,7 +43,7 @@ const ShopBanner = ({
   location,
   imageUrl,
   description,
-}: StoreInfo) => {
+}: ShopBannerProps) => {
   return (
     <div className="mx-auto flex w-[964px] gap-6 rounded-[12px] bg-[var(--color-red-10)] p-6 max-[744px]:w-[680px] max-[744px]:flex-col max-[744px]:gap-4 max-[375px]:w-[351px] max-[375px]:gap-3 max-[375px]:p-5">
       {/* 이미지 영역 */}

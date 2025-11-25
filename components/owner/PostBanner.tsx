@@ -23,7 +23,7 @@ import PostTime from '../post/PostTime';
 import PostWage from '../post/PostWage';
 import 'tippy.js/dist/tippy.css';
 
-interface StoreInfo {
+interface PostBannerInfo {
   name: string;
   startAt: string;
   workTime: number;
@@ -43,7 +43,7 @@ const PostBanner = ({
   imageUrl,
   description,
   percentage,
-}: StoreInfo) => {
+}: PostBannerInfo) => {
   const { workInfo, isColor, getBadgeColor } = usePost({
     startAt,
     workTime,
@@ -101,9 +101,7 @@ const PostBanner = ({
 
         {/* 버튼 영역: 항상 아래 */}
         <div className="flex h-[48px] w-full max-[744px]:mt-[40px] max-[744px]:h-[48px] max-[375px]:mt-[24px] max-[375px]:h-[38px]">
-          <Button
-            variant="secondary"
-            className="h-full max-w-none flex-1">
+          <Button variant="secondary" className="h-full max-w-none flex-1">
             공고 편집하기
           </Button>
         </div>

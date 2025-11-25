@@ -33,13 +33,7 @@ const Signup = () => {
   ];
 
   // '가입하기' 버튼 비활성화 조건
-  const isDisabled =
-    !email ||
-    !password ||
-    !passwordConfirm ||
-    !!emailError ||
-    !!passwordError ||
-    !!passwordConfirmError;
+  const isDisabled = !!emailError || !!passwordError || !!passwordConfirmError;
 
   // 회원 유형 옵션 버튼 렌더링 함수
   const renderUserTypeButton = (option: { type: UserType; label: string }) => {

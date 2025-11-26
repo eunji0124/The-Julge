@@ -49,7 +49,7 @@ const Login = () => {
     !!formErrors.password;
 
   // 로그인 처리
-  const handledSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     // 모든 필드에 대한 유효성 검사
@@ -62,7 +62,7 @@ const Login = () => {
     if (!formData.email) {
       newErrors.email = '값을 입력해 주세요.';
       formIsValid = false;
-    } else if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = '이메일 형식으로 작성해 주세요.';
       formIsValid = false;
     }
@@ -73,20 +73,20 @@ const Login = () => {
     } else if (formData.password.length < 8) {
       newErrors.password = '8자 이상 입력해 주세요.';
       formIsValid = false;
-
-      setFormErrors(newErrors);
-
-      if (!formIsValid) return;
-
-      // 로그인 로직 처리
-      const loginData: LoginRequest = {
-        email: formData.email,
-        password: formData.password,
-      };
-
-      // TODO: API 호출 로직으로 대체 필요
-      console.log('로그인 데이터:', loginData);
     }
+
+    setFormErrors(newErrors);
+
+    if (!formIsValid) return;
+
+    // 로그인 로직 처리
+    const loginData: LoginRequest = {
+      email: formData.email,
+      password: formData.password,
+    };
+
+    // TODO: API 호출 로직으로 대체 필요
+    console.log('로그인 데이터:', loginData);
   };
 
   return (
@@ -111,7 +111,7 @@ const Login = () => {
 
           {/* 로그인 폼 */}
           <form
-            onSubmit={handledSubmit}
+            onSubmit={handleSubmit}
             className="mt-10 flex w-full flex-col gap-7">
             {/* 이메일 */}
             <Input

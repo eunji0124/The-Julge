@@ -9,6 +9,12 @@ import AuthRedirect from '@/components/auth/AuthRedirect';
 import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
 
+// 회원 유형 옵션
+const USER_TYPE_OPTIONS = [
+  { type: UserType.EMPLOYEE, label: '알바님' },
+  { type: UserType.EMPLOYER, label: '사장님' },
+];
+
 /**
  * 회원가입 페이지
  * - 이메일, 비밀번호 입력 및 검증
@@ -16,34 +22,55 @@ import Input from '@/components/common/Input';
  */
 const Signup = () => {
   // form 상태 관리
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [passwordConfirm, setPasswordConfirm] = useState('');
-  const [userType, setUserType] = useState<UserType>(UserType.EMPLOYEE); // '알바님'으로 초기 표시
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    passwordConfirm: '',
+    userType: UserType.EMPLOYEE, // '알바님'으로 초기 표시
+  });
 
   // form 입력값 에러 상태
-  const [emailError, setEmailError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
-  const [passwordConfirmError, setPasswordConfirmError] = useState('');
+  const [formErrors, setFormErrors] = useState({
+    email: '',
+    password: '',
+    passwordConfirm: '',
+  });
 
-  // 회원 유형 옵션
-  const userTypeOptions = [
-    { type: UserType.EMPLOYEE, label: '알바님' },
-    { type: UserType.EMPLOYER, label: '사장님' },
-  ];
+  // 폼 데이터 업데이트 함수
+  const handleInputChange = (field: string, value: string | UserType) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
 
-  // '가입하기' 버튼 비활성화 조건
-  const isDisabled = !!emailError || !!passwordError || !!passwordConfirmError;
+  // 에러 업데이트 함수
+  const handleErrorChange = (field: string, message: string) => {
+    setFormErrors((prev) => ({
+      ...prev,
+      [field]: message,
+    }));
+  };
+
+  // 가입하기 버튼 비활성화 조건
+  const isDisabled =
+    !formData.email ||
+    !formData.password ||
+    !formData.passwordConfirm ||
+    formData.password !== formData.passwordConfirm ||
+    !!formErrors.email ||
+    !!formErrors.password ||
+    !!formErrors.passwordConfirm;
 
   // 회원 유형 옵션 버튼 렌더링 함수
   const renderUserTypeButton = (option: { type: UserType; label: string }) => {
-    const isSelected = userType === option.type;
+    const isSelected = formData.userType === option.type;
 
     return (
       <button
         key={option.type}
         type="button"
-        onClick={() => setUserType(option.type)}
+        onClick={() => handleInputChange('userType', option.type)}
         className={`flex flex-[1_0_0] flex-col items-start gap-2 rounded-[30px] border bg-white px-[41px] py-[13px] transition-all ${
           isSelected ? 'border-red-50' : 'border-gray-30'
         }`}>
@@ -72,19 +99,17 @@ const Signup = () => {
     e.preventDefault();
 
     // 에러 확인
-    if (emailError || passwordError || passwordConfirmError) return;
-
-    // 빈 값 체크
-    if (!email || !password || !passwordConfirm) {
-      alert('모든 필드를 입력해주세요');
+    if (formErrors.email || formErrors.password || formErrors.passwordConfirm)
       return;
-    }
+    // 빈 값 체크
+    if (!formData.email || !formData.password || !formData.passwordConfirm)
+      return;
 
     // 회원가입 로직 처리
     const signupData: SignupRequest = {
-      email,
-      password,
-      type: userType,
+      email: formData.email,
+      password: formData.password,
+      type: formData.userType,
     };
 
     console.log('회원가입 데이터:', signupData);
@@ -105,7 +130,7 @@ const Signup = () => {
               alt="The Julge 로고"
               width={208}
               height={38}
-              className="h-[38px] w-[208px] md:h-[45px] md:w-[248px] lg:h-[45px] lg:w-[248px]"
+              className="md:h-[45px] md:w-[248px]"
               priority
             />
           </Link>
@@ -118,10 +143,12 @@ const Signup = () => {
             <Input
               type="email"
               label="이메일"
-              value={email}
-              onChange={setEmail}
-              error={emailError}
-              onValidate={(isValid, message) => setEmailError(message)}
+              value={formData.email}
+              onChange={(value) => handleInputChange('email', value)}
+              error={formErrors.email}
+              onValidate={(isValid, message) =>
+                handleErrorChange('email', message)
+              }
               placeholder="입력"
             />
 
@@ -129,10 +156,12 @@ const Signup = () => {
             <Input
               type="password"
               label="비밀번호"
-              value={password}
-              onChange={setPassword}
-              error={passwordError}
-              onValidate={(isValid, message) => setPasswordError(message)}
+              value={formData.password}
+              onChange={(value) => handleInputChange('password', value)}
+              error={formErrors.password}
+              onValidate={(isValid, message) =>
+                handleErrorChange('password', message)
+              }
               placeholder="입력"
             />
 
@@ -140,12 +169,12 @@ const Signup = () => {
             <Input
               type="password"
               label="비밀번호 확인"
-              value={passwordConfirm}
-              onChange={setPasswordConfirm}
-              matchValue={password}
-              error={passwordConfirmError}
+              value={formData.passwordConfirm}
+              onChange={(value) => handleInputChange('passwordConfirm', value)}
+              matchValue={formData.password}
+              error={formErrors.passwordConfirm}
               onValidate={(isValid, message) =>
-                setPasswordConfirmError(message)
+                handleErrorChange('passwordConfirm', message)
               }
               placeholder="입력"
             />
@@ -156,7 +185,7 @@ const Signup = () => {
                 회원 유형
               </label>
               <div className="flex gap-4">
-                {userTypeOptions.map(renderUserTypeButton)}
+                {USER_TYPE_OPTIONS.map(renderUserTypeButton)}
               </div>
             </div>
 

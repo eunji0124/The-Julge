@@ -118,7 +118,7 @@ const Signup = () => {
     if (!formData.email) {
       newErrors.email = '값을 입력해 주세요.';
       formIsValid = false;
-    } else if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = '이메일 형식으로 작성해 주세요.';
       formIsValid = false;
     }
@@ -141,9 +141,7 @@ const Signup = () => {
 
     setFormErrors(newErrors);
 
-    if (!formIsValid) {
-      return;
-    }
+    if (!formIsValid) return;
 
     // 회원가입 로직 처리
     const signupData: SignupRequest = {

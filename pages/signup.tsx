@@ -165,7 +165,7 @@ const Signup = () => {
       <div className="flex justify-center">
         <div className="flex w-full max-w-[350px] flex-col items-center justify-center">
           {/* 로고 */}
-          <Link href="/" className="mt-[73px]">
+          <Link href="/" className="mt-[73px] md:mt-[139px] lg:mt-[156px]">
             <Image
               src="/images/logo.svg"
               alt="The Julge 로고"

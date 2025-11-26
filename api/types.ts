@@ -39,6 +39,10 @@ export interface User {
   id: string;
   email: string;
   type: UserType;
+  name?: string;
+  phone?: string;
+  address?: string;
+  bio?: string;
 }
 
 /**
@@ -55,5 +59,27 @@ export interface SignupRequest {
  */
 export interface SignupResponse {
   item: User;
+  links: ApiLink[];
+}
+
+/**
+ * 로그인 요청 타입
+ */
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+/**
+ * 로그인 응답 타입
+ */
+export interface LoginResponse {
+  item: {
+    token: string; // JWT 토큰
+    user: {
+      item: User;
+      href: string;
+    };
+  };
   links: ApiLink[];
 }

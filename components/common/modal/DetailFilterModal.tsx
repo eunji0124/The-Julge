@@ -61,10 +61,12 @@ const DetailFilterModal = ({
   };
 
   useEffect(() => {
-    setSelectedLocations(initialValues?.locations || []);
-    setStartDate(initialValues?.startDate || '');
-    setAmount(initialValues?.amount || '');
-  }, [initialValues]);
+    if (isOpen) {
+      setSelectedLocations(initialValues?.locations || []);
+      setStartDate(initialValues?.startDate || '');
+      setAmount(initialValues?.amount || '');
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

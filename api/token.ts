@@ -12,10 +12,7 @@ const token = {
    * @param data - 로그인 정보 (email, password)
    * @return LoginResponse - 토큰 및 사용자 정보
    */
-  login: async (data: LoginRequest) => {
-    const response = await api.post<LoginResponse>('/token', data);
-    return response;
-  },
+  login: (data: LoginRequest) => api.post<LoginResponse>('/token', data),
 };
 
 export default token;

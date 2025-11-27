@@ -4,12 +4,21 @@ import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { LoginRequest } from '@/api/types';
+import { isAxiosError } from 'axios';
+
+import { ApiErrorResponse, LoginRequest } from '@/api/types';
 import AuthRedirect from '@/components/auth/AuthRedirect';
 import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
+import ErrorModal from '@/components/common/modal/ErrorModal';
+import useLogin from '@/hooks/useLogin';
 
 const Login = () => {
+  // API 메시지
+  const [apiMessage, setApiMessage] = useState('');
+  // Modal 표시 상태
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   // form 상태 관리
   const [formData, setFormData] = useState({
     email: '',
@@ -21,6 +30,9 @@ const Login = () => {
     email: '',
     password: '',
   });
+
+  // seLogin 훅 호출 → mutation 객체 반환
+  const loginMutation = useLogin();
 
   // 폼 데이터 업데이트 함수
   const handleInputChange = (field: keyof typeof formData, value: string) => {
@@ -49,7 +61,7 @@ const Login = () => {
     !!formErrors.password;
 
   // 로그인 처리
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // 모든 필드에 대한 유효성 검사
@@ -79,14 +91,25 @@ const Login = () => {
 
     if (!formIsValid) return;
 
-    // 로그인 로직 처리
     const loginData: LoginRequest = {
       email: formData.email,
       password: formData.password,
     };
 
-    // TODO: API 호출 로직으로 대체 필요
-    console.log('로그인 데이터:', loginData);
+    // 로그인 API 호출
+    loginMutation.mutate(loginData, {
+      onError: (error) => {
+        // 404 에러 (비밀번호 또는 이메일 불일치) 체크
+        if (isAxiosError<ApiErrorResponse>(error) && error.response) {
+          const statusCode = error.response.status;
+
+          if (statusCode === 404) {
+            setApiMessage('비밀번호가 일치하지 않습니다.');
+            setIsModalOpen(true);
+          }
+        }
+      },
+    });
   };
 
   return (
@@ -153,6 +176,14 @@ const Login = () => {
           <AuthRedirect variant="login" />
         </div>
       </div>
+
+      {/* Error Modal */}
+      {isModalOpen && (
+        <ErrorModal
+          message={apiMessage}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
     </>
   );
 };

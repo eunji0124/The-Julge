@@ -4,6 +4,7 @@ import axios, {
   AxiosRequestConfig,
   InternalAxiosRequestConfig,
 } from 'axios';
+import { toast } from 'react-toastify';
 
 /**
  * API 베이스 URL 환경 변수
@@ -50,30 +51,32 @@ apiClient.interceptors.request.use(
  * 응답 인터셉터
  * - 모든 응답 후 실행
  * - 성공 시: response.data만 반환하여 코드 간소화
- * - 실패 시: 에러 타입별 로깅 및 처리
+ * - 실패 시: 에러 타입별 toast 표시 및 처리
  */
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => response.data,
   (error: AxiosError) => {
-    // TODO: alert이 아닌 toast 처리 고려
+    let errorMessage = '';
+
     if (error.code === 'ECONNABORTED') {
-      alert('요청 시간이 초과되었습니다. 다시 시도해 주세요.');
+      errorMessage = '요청 시간이 초과되었습니다. 다시 시도해 주세요.';
+    } else if (error.request && !error.response) {
+      // 네트워크 오류 (요청은 보냈으나 응답을 받지 못함)
+      errorMessage =
+        '네트워크 오류가 발생했습니다. 인터넷 연결을 확인해 주세요.';
+    } else if (error.response?.status && error.response.status >= 500) {
+      // 서버 에러 (500번대)
+      errorMessage = '서버 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
+    } else if (error.response?.status === 401) {
+      // 인증 에러
+      toast.error('로그인이 필요합니다.');
+      window.location.href = '/login'; // 로그인 페이지로 이동
+      return Promise.reject(error);
     }
 
-    // 네트워크 오류 (요청은 보냈으나 응답을 받지 못함)
-    if (error.request && !error.response) {
-      alert('네트워크 오류가 발생했습니다. 인터넷 연결을 확인해 주세요.');
-    }
-
-    // 서버 에러 (500번대)
-    if (error.response?.status && error.response.status >= 500) {
-      alert('서버 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
-    }
-
-    if (error.response?.status === 401) {
-      console.error('인증 에러');
-      // TODO: 토큰 갱신 또는 로그인 페이지로 리디렉션하는 로직을 구현
-      // 예: window.location.assign('/login');
+    // 에러 메시지가 있는 경우, toast 표시
+    if (errorMessage) {
+      toast.error(errorMessage);
     }
 
     return Promise.reject(error);

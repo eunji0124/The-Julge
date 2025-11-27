@@ -10,6 +10,7 @@ import users from '@/api/users';
 import AuthRedirect from '@/components/auth/AuthRedirect';
 import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
+import ErrorModal from '@/components/common/modal/ErrorModal';
 import { cn } from '@/lib/utils';
 
 // 회원 유형 옵션
@@ -17,6 +18,15 @@ const USER_TYPE_OPTIONS = [
   { type: UserType.EMPLOYEE, label: '알바님' },
   { type: UserType.EMPLOYER, label: '사장님' },
 ];
+
+// API 메시지 상수
+const API_MESSAGE = {
+  SUCCESS: '가입이 완료되었습니다!',
+  DUPLICATE_EMAIL: '이미 가입된 이메일입니다.',
+  INVALID_INPUT: '입력 정보를 다시 확인해 주세요.',
+  SIGNUP_FAILED: '회원가입에 실패했습니다.',
+  PROCESSING_ERROR: '회원가입 처리 중 오류가 발생했습니다.',
+};
 
 /**
  * 회원가입 페이지
@@ -28,7 +38,10 @@ const Signup = () => {
 
   // API 요청 상태
   const [isLoading, setIsLoading] = useState(false);
-  const [apiError, setApiError] = useState('');
+  const [apiMessage, setApiMessage] = useState('');
+
+  // Modal 표시 상태
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // form 상태 관리
   const [formData, setFormData] = useState({
@@ -56,7 +69,7 @@ const Signup = () => {
     }));
 
     // API 에러 초기화
-    if (apiError) setApiError('');
+    if (apiMessage) setApiMessage('');
   };
 
   // 에러 업데이트 함수
@@ -116,6 +129,13 @@ const Signup = () => {
     );
   };
 
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    if (apiMessage === API_MESSAGE.SUCCESS) {
+      router.push('/login');
+    }
+  };
+
   // 회원가입 제출 처리
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -158,7 +178,7 @@ const Signup = () => {
 
     // API 요청 상태 초기화
     setIsLoading(true);
-    setApiError('');
+    setApiMessage('');
 
     // 회원가입 로직 처리
     const signupData: SignupRequest = {
@@ -171,7 +191,8 @@ const Signup = () => {
       const response = await users.signup(signupData);
 
       console.log('회원가입 성공:', response);
-      router.push('/login');
+      setApiMessage(API_MESSAGE.SUCCESS);
+      setIsModalOpen(true);
     } catch (error) {
       // 에러 처리
       console.error('회원가입 실패:', error);
@@ -196,26 +217,25 @@ const Signup = () => {
 
           if (status === 409) {
             // 이미 가입된 이메일
-            errorMessage = message || '이미 가입된 이메일입니다.';
+            errorMessage = message || API_MESSAGE.DUPLICATE_EMAIL;
           } else if (status === 400) {
             // 잘못된 요청
-            errorMessage = message || '입력 정보를 다시 확인해 주세요.';
+            errorMessage = message || API_MESSAGE.INVALID_INPUT;
           } else {
-            errorMessage = message || '회원가입에 실패했습니다.';
+            errorMessage = message || API_MESSAGE.SIGNUP_FAILED;
           }
         } else {
           // 요청 설정 중 에러 발생
-          errorMessage = '회원가입 처리 중 오류가 발생했습니다.';
+          errorMessage = API_MESSAGE.PROCESSING_ERROR;
         }
       } else {
         // 예상치 못한 에러
-        errorMessage = '회원가입 처리 중 오류가 발생했습니다.';
+        errorMessage = API_MESSAGE.PROCESSING_ERROR;
       }
 
-      // 에러 메시지 표시
-      setApiError(errorMessage);
-      // TODO: Modal 컴포넌트 표시
-      alert(errorMessage);
+      // API 메시지 설정해서 Modal 표시
+      setApiMessage(errorMessage);
+      setIsModalOpen(true);
     } finally {
       setIsLoading(false);
     }
@@ -312,6 +332,11 @@ const Signup = () => {
           <AuthRedirect variant="signup" />
         </div>
       </div>
+
+      {/* Error Modal */}
+      {isModalOpen && (
+        <ErrorModal message={apiMessage} onClose={handleModalClose} />
+      )}
     </>
   );
 };

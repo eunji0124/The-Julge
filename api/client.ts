@@ -80,6 +80,7 @@ apiClient.interceptors.response.use(
       ) {
         window.location.assign('/login');
       }
+      return Promise.reject(error);
     }
 
     // 에러 메시지가 있는 경우, toast 표시

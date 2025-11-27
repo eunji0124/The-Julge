@@ -23,6 +23,13 @@ export interface ApiLink {
 }
 
 /**
+ * API 에러 응답 타입
+ */
+export interface ApiErrorResponse {
+  message: string;
+}
+
+/**
  * 사용자 유형
  * - EMPLOYEE: 직원 (알바생)
  * - EMPLOYER: 고용주 (사장님)

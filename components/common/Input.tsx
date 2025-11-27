@@ -114,6 +114,7 @@ interface InputProps {
   isDropdownOpen?: boolean;
   error?: string;
   onValidate?: (isValid: boolean, errorMessage: string) => void;
+  disabled?: boolean;
 }
 
 // 공통 스타일 함수
@@ -162,6 +163,7 @@ const Input = ({
   isDropdownOpen = false,
   error,
   onValidate,
+  disabled = false,
 }: InputProps) => {
   // ID 생성
   const generatedId = useId();
@@ -234,6 +236,7 @@ const Input = ({
               hasRightElement: type === 'select' || Boolean(unit),
             })
           )}
+          disabled={disabled}
         />
 
         {/* Select 타입 화살표*/}

@@ -3,11 +3,16 @@ import { useState } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 
-import { SignupRequest, UserType } from '@/api/types';
+import { isAxiosError } from 'axios';
+
+import { ApiErrorResponse, SignupRequest, UserType } from '@/api/types';
+import users from '@/api/users';
 import AuthRedirect from '@/components/auth/AuthRedirect';
 import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
+import ErrorModal from '@/components/common/modal/ErrorModal';
 import { cn } from '@/lib/utils';
 
 // 회원 유형 옵션
@@ -16,12 +21,30 @@ const USER_TYPE_OPTIONS = [
   { type: UserType.EMPLOYER, label: '사장님' },
 ];
 
+// API 메시지 상수
+const API_MESSAGE = {
+  SUCCESS: '가입이 완료되었습니다!',
+  DUPLICATE_EMAIL: '이미 사용중인 이메일입니다.',
+  INVALID_INPUT: '입력 정보를 다시 확인해 주세요.',
+  SIGNUP_FAILED: '회원가입에 실패했습니다.',
+  PROCESSING_ERROR: '회원가입 처리 중 오류가 발생했습니다.',
+};
+
 /**
  * 회원가입 페이지
  * - 이메일, 비밀번호 입력 및 검증
  * - 회원 유형 선택 (알바님/사장님)
  */
 const Signup = () => {
+  const router = useRouter();
+
+  // API 요청 상태
+  const [isLoading, setIsLoading] = useState(false);
+  const [apiMessage, setApiMessage] = useState('');
+
+  // Modal 표시 상태
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   // form 상태 관리
   const [formData, setFormData] = useState({
     email: '',
@@ -46,6 +69,9 @@ const Signup = () => {
       ...prev,
       [field]: value,
     }));
+
+    // API 에러 초기화
+    if (apiMessage) setApiMessage('');
   };
 
   // 에러 업데이트 함수
@@ -67,7 +93,8 @@ const Signup = () => {
     formData.password !== formData.passwordConfirm ||
     !!formErrors.email ||
     !!formErrors.password ||
-    !!formErrors.passwordConfirm;
+    !!formErrors.passwordConfirm ||
+    isLoading;
 
   // 회원 유형 옵션 버튼 렌더링 함수
   const renderUserTypeButton = (option: { type: UserType; label: string }) => {
@@ -78,6 +105,7 @@ const Signup = () => {
         key={option.type}
         type="button"
         onClick={() => handleInputChange('userType', option.type)}
+        disabled={isLoading}
         className={cn(
           'flex flex-[1_0_0] flex-col items-start gap-2 rounded-[30px] border bg-white px-[41px] py-[13px] transition-all',
           isSelected ? 'border-red-50' : 'border-gray-30'
@@ -103,8 +131,15 @@ const Signup = () => {
     );
   };
 
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    if (apiMessage === API_MESSAGE.SUCCESS) {
+      router.push('/login');
+    }
+  };
+
   // 회원가입 제출 처리
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // 모든 필드에 대한 유효성 검사 수행
@@ -143,6 +178,10 @@ const Signup = () => {
 
     if (!formIsValid) return;
 
+    // API 요청 상태 초기화
+    setIsLoading(true);
+    setApiMessage('');
+
     // 회원가입 로직 처리
     const signupData: SignupRequest = {
       email: formData.email,
@@ -150,8 +189,37 @@ const Signup = () => {
       type: formData.userType,
     };
 
-    // TODO: API 호출 로직으로 대체 필요
-    console.log('회원가입 데이터:', signupData);
+    try {
+      const response = await users.signup(signupData);
+
+      console.log('회원가입 성공:', response);
+      setApiMessage(API_MESSAGE.SUCCESS);
+      setIsModalOpen(true);
+    } catch (error) {
+      // 에러 처리
+      console.error('회원가입 실패:', error);
+
+      // axios 에러 타입 체크
+      if (isAxiosError<ApiErrorResponse>(error) && error.response) {
+        const { status, data } = error.response;
+        const message = data?.message;
+
+        if (status === 409) {
+          setApiMessage(message || API_MESSAGE.DUPLICATE_EMAIL);
+          setIsModalOpen(true);
+        } else if (status === 400) {
+          setApiMessage(message || API_MESSAGE.INVALID_INPUT);
+          setIsModalOpen(true);
+        }
+        // 409, 400 외의 다른 Axios 에러는 api/client.ts의 인터셉터에서 공통으로 처리하므로 여기서는 모달을 띄우지 않습니다.
+      } else {
+        // Axios 에러가 아니거나, 응답이 없는 예상치 못한 에러는 별도 처리합니다.
+        setApiMessage(API_MESSAGE.PROCESSING_ERROR);
+        setIsModalOpen(true);
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -189,6 +257,7 @@ const Signup = () => {
                 handleErrorChange('email', message)
               }
               placeholder="입력"
+              disabled={isLoading}
             />
 
             {/* 비밀번호 */}
@@ -202,6 +271,7 @@ const Signup = () => {
                 handleErrorChange('password', message)
               }
               placeholder="입력"
+              disabled={isLoading}
             />
 
             {/* 비밀번호 확인 */}
@@ -216,6 +286,7 @@ const Signup = () => {
                 handleErrorChange('passwordConfirm', message)
               }
               placeholder="입력"
+              disabled={isLoading}
             />
 
             {/* 회원 유형 */}
@@ -234,7 +305,7 @@ const Signup = () => {
               variant="primary"
               size="large"
               disabled={isDisabled}>
-              가입하기
+              {isLoading ? '가입 중...' : '가입하기'}
             </Button>
           </form>
 
@@ -242,6 +313,11 @@ const Signup = () => {
           <AuthRedirect variant="signup" />
         </div>
       </div>
+
+      {/* Error Modal */}
+      {isModalOpen && (
+        <ErrorModal message={apiMessage} onClose={handleModalClose} />
+      )}
     </>
   );
 };

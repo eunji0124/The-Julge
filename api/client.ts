@@ -20,9 +20,10 @@ if (process.env.NODE_ENV === 'development' && !BASE_URL) {
 }
 
 /**
- * Axios 인스턴스
+ * Axios 인스턴스 (쿠키 방식)
  * - 기본 URL 및 공통 설정 적용
  * - 5초 타임아웃 설정
+ * - withCredentials: true (쿠키 자동 전송)
  */
 const apiClient = axios.create({
   baseURL: BASE_URL,
@@ -30,6 +31,7 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // 쿠키 포함
 });
 
 /**
@@ -39,7 +41,7 @@ const apiClient = axios.create({
  */
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // TODO: 토큰 추가 로직
+    // 쿠키는 브라우저가 자동으로 전송
     return config;
   },
   (error: AxiosError) => {
@@ -70,8 +72,14 @@ apiClient.interceptors.response.use(
     } else if (error.response?.status === 401) {
       // 인증 에러
       toast.error('로그인이 필요합니다.');
-      window.location.href = '/login'; // 로그인 페이지로 이동
-      return Promise.reject(error);
+
+      // 401 에러 시 로그인 페이지로 리디렉션
+      if (
+        typeof window !== 'undefined' &&
+        window.location.pathname !== '/login'
+      ) {
+        window.location.assign('/login');
+      }
     }
 
     // 에러 메시지가 있는 경우, toast 표시
@@ -95,40 +103,30 @@ export const api = {
   get: <T = unknown>(
     url: string,
     config: AxiosRequestConfig = {}
-  ): Promise<T> => {
-    return apiClient.get<T>(url, config) as Promise<T>;
-  },
+  ): Promise<T> => apiClient.get<T>(url, config) as Promise<T>,
 
   post: <T = unknown>(
     url: string,
     data?: unknown,
     config: AxiosRequestConfig = {}
-  ): Promise<T> => {
-    return apiClient.post<T>(url, data, config) as Promise<T>;
-  },
+  ): Promise<T> => apiClient.post<T>(url, data, config) as Promise<T>,
 
   put: <T = unknown>(
     url: string,
     data?: unknown,
     config: AxiosRequestConfig = {}
-  ): Promise<T> => {
-    return apiClient.put<T>(url, data, config) as Promise<T>;
-  },
+  ): Promise<T> => apiClient.put<T>(url, data, config) as Promise<T>,
 
   patch: <T = unknown>(
     url: string,
     data?: unknown,
     config: AxiosRequestConfig = {}
-  ): Promise<T> => {
-    return apiClient.patch<T>(url, data, config) as Promise<T>;
-  },
+  ): Promise<T> => apiClient.patch<T>(url, data, config) as Promise<T>,
 
   delete: <T = unknown>(
     url: string,
     config: AxiosRequestConfig = {}
-  ): Promise<T> => {
-    return apiClient.delete<T>(url, config) as Promise<T>;
-  },
+  ): Promise<T> => apiClient.delete<T>(url, config) as Promise<T>,
 };
 
 export default apiClient;

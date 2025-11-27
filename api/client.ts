@@ -55,8 +55,19 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => response.data,
   (error: AxiosError) => {
+    // TODO: alert이 아닌 toast 처리 고려
     if (error.code === 'ECONNABORTED') {
-      console.error('요청 시간 초과');
+      alert('요청 시간이 초과되었습니다. 다시 시도해 주세요.');
+    }
+
+    // 네트워크 오류 (요청은 보냈으나 응답을 받지 못함)
+    if (error.request && !error.response) {
+      alert('네트워크 오류가 발생했습니다. 인터넷 연결을 확인해 주세요.');
+    }
+
+    // 서버 에러 (500번대)
+    if (error.response?.status && error.response.status >= 500) {
+      alert('서버 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
     }
 
     if (error.response?.status === 401) {

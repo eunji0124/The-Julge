@@ -3,8 +3,10 @@ import { useState } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 
-import { SignupRequest, UserType } from '@/api/types';
+import { ApiErrorResponse, SignupRequest, UserType } from '@/api/types';
+import users from '@/api/users';
 import AuthRedirect from '@/components/auth/AuthRedirect';
 import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
@@ -22,6 +24,12 @@ const USER_TYPE_OPTIONS = [
  * - 회원 유형 선택 (알바님/사장님)
  */
 const Signup = () => {
+  const router = useRouter();
+
+  // API 요청 상태
+  const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError] = useState('');
+
   // form 상태 관리
   const [formData, setFormData] = useState({
     email: '',
@@ -46,6 +54,9 @@ const Signup = () => {
       ...prev,
       [field]: value,
     }));
+
+    // API 에러 초기화
+    if (apiError) setApiError('');
   };
 
   // 에러 업데이트 함수
@@ -67,7 +78,8 @@ const Signup = () => {
     formData.password !== formData.passwordConfirm ||
     !!formErrors.email ||
     !!formErrors.password ||
-    !!formErrors.passwordConfirm;
+    !!formErrors.passwordConfirm ||
+    isLoading;
 
   // 회원 유형 옵션 버튼 렌더링 함수
   const renderUserTypeButton = (option: { type: UserType; label: string }) => {
@@ -78,6 +90,7 @@ const Signup = () => {
         key={option.type}
         type="button"
         onClick={() => handleInputChange('userType', option.type)}
+        disabled={isLoading}
         className={cn(
           'flex flex-[1_0_0] flex-col items-start gap-2 rounded-[30px] border bg-white px-[41px] py-[13px] transition-all',
           isSelected ? 'border-red-50' : 'border-gray-30'
@@ -104,7 +117,7 @@ const Signup = () => {
   };
 
   // 회원가입 제출 처리
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // 모든 필드에 대한 유효성 검사 수행
@@ -143,6 +156,10 @@ const Signup = () => {
 
     if (!formIsValid) return;
 
+    // API 요청 상태 초기화
+    setIsLoading(true);
+    setApiError('');
+
     // 회원가입 로직 처리
     const signupData: SignupRequest = {
       email: formData.email,
@@ -150,8 +167,58 @@ const Signup = () => {
       type: formData.userType,
     };
 
-    // TODO: API 호출 로직으로 대체 필요
-    console.log('회원가입 데이터:', signupData);
+    try {
+      const response = await users.signup(signupData);
+
+      console.log('회원가입 성공:', response);
+      router.push('/login');
+    } catch (error) {
+      // 에러 처리
+      console.error('회원가입 실패:', error);
+
+      let errorMessage = '';
+
+      // axios 에러 타입 체크
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as {
+          response?: {
+            status: number;
+            data?: ApiErrorResponse;
+          };
+          request?: unknown;
+        };
+
+        if (axiosError.response) {
+          // 서버에서 반환한 에러
+          const status = axiosError.response.status;
+          const errorData = axiosError.response.data;
+          const message = errorData?.message;
+
+          if (status === 409) {
+            // 이미 가입된 이메일
+            errorMessage = message || '이미 가입된 이메일입니다.';
+          } else if (status === 400) {
+            // 잘못된 요청
+            errorMessage = message || '입력 정보를 다시 확인해 주세요.';
+          } else {
+            errorMessage = message || '회원가입에 실패했습니다.';
+          }
+        } else {
+          // 요청 설정 중 에러 발생
+          errorMessage = '회원가입 처리 중 오류가 발생했습니다.';
+        }
+      } else {
+        // 예상치 못한 에러
+        errorMessage = '회원가입 처리 중 오류가 발생했습니다.';
+      }
+
+      // 에러 메시지 표시
+      setApiError(errorMessage);
+      // TODO: Modal 컴포넌트 표시
+      alert(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -189,6 +256,7 @@ const Signup = () => {
                 handleErrorChange('email', message)
               }
               placeholder="입력"
+              disabled={isLoading}
             />
 
             {/* 비밀번호 */}
@@ -202,6 +270,7 @@ const Signup = () => {
                 handleErrorChange('password', message)
               }
               placeholder="입력"
+              disabled={isLoading}
             />
 
             {/* 비밀번호 확인 */}
@@ -216,6 +285,7 @@ const Signup = () => {
                 handleErrorChange('passwordConfirm', message)
               }
               placeholder="입력"
+              disabled={isLoading}
             />
 
             {/* 회원 유형 */}
@@ -234,7 +304,7 @@ const Signup = () => {
               variant="primary"
               size="large"
               disabled={isDisabled}>
-              가입하기
+              {isLoading ? '가입 중...' : '가입하기'}
             </Button>
           </form>
 

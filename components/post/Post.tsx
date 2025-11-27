@@ -14,6 +14,7 @@ interface StoreInfo {
   imageUrl: string;
   isActive?: boolean;
   percentage?: number;
+  className?: string; // 이 줄을 추가합니다.
 }
 
 const Post = ({
@@ -25,6 +26,7 @@ const Post = ({
   imageUrl,
   isActive = true,
   percentage,
+  className,
 }: StoreInfo) => {
   const { workInfo, isColor, overlayText, getBadgeColor } = usePost({
     startAt,
@@ -33,7 +35,7 @@ const Post = ({
   });
 
   return (
-    <div className={postClasses.container()}>
+    <div className={`${postClasses.container()} ${className || ''}`}>
       {/* 이미지 + 오버레이 */}
       <div className="h-[84px] max-w-[280px] sm:h-[160px]">
         <PostImage

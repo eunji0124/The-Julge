@@ -1,38 +1,112 @@
 import { useMemo, useState } from 'react';
 
+import {
+  Column,
+  EMPLOYEE_COLUMNS,
+  EMPLOYER_COLUMNS,
+} from '@/constants/tableColumns';
+import { useIsEmployer } from '@/hooks/useCheckUserType';
+
 import Badge, { BadgeStatus } from './Badge';
 import Pagination from './Pagination';
 
-/** 사용 예제
- * 
-const Ex = () => {
-  const columns = [
-    { key: 'name', label: '가게' },
-    { key: 'workhour', label: '일자' },
-    { key: 'hourlyPay', label: '시급' },
-    { key: 'status', label: '상태', fixed: 'right' as const },
-  ];
-
-  const data = [
-    {
-      id: '1',
-      name: 'HS 과일주스',
-      workhour: '2023-01-12 10:00 ~ 12:00 (2시간)',
-      hourlyPay: '15,000원',
-      status: 'accepted',
-    },
-    // ... 더 많은 데이터
-  ];
-
-  return (
-    <div className="flex flex-col items-start">
-      <Table columns={columns} data={data} rowKey="id" />
-    </div>
-  );
-};
+/**
+ * @description
+ * 페이지네이션과 반응형 레이아웃을 지원하는 테이블 컴포넌트
+ * - 사장님/알바님 모드에 따라 다른 컬럼 표시
+ * - 사장님 모드: 신청 대기 상태일 때 승인/거절 버튼 표시
+ * - 알바님 모드: 상태 뱃지만 표시
+ *
+ * @example
+ * // 1. 사장님용 테이블
+ * const EmployerExample = () => {
+ *   // API 응답 데이터
+ *   const employerApiData = {
+ *     items: [
+ *       {
+ *         item: {
+ *           id: '7c5d86c6-ae25-444c-90c6-8fddbf294bb1',
+ *           status: '', // 대기중
+ *           user: {
+ *             item: {
+ *               name: '김강헌',
+ *               phone: '010-0000-0000',
+ *               bio: '최선을 다해 열심히 일합니다.',
+ *             },
+ *           },
+ *         },
+ *       },
+ *       // ... 더 많은 items
+ *     ],
+ *   };
+ *
+ *   // transformEmployerData 유틸 함수로 변환
+ *   const employerData = transformEmployerData(employerApiData.items);
+ *   // 결과: [{ id: '7c5d86c6-...', name: '김강헌', bio: '최선을...', phone: '010-0000-0000', status: '' }]
+ *
+ *   const handleApprove = async (id: string) => {
+ *     console.log('승인 API 호출:', id);
+ *     // await approveApplication(id);
+ *   };
+ *
+ *   const handleReject = async (id: string) => {
+ *     console.log('거절 API 호출:', id);
+ *     // await rejectApplication(id);
+ *   };
+ *
+ *   return (
+ *     <Table
+ *       data={employerData}
+ *       rowKey="id"
+ *       onApprove={handleApprove}
+ *       onReject={handleReject}
+ *     />
+ *   );
+ * };
+ *
+ * @example
+ * // 2. 알바님용 테이블
+ * const EmployeeExample = () => {
+ *   // API 응답 데이터
+ *   const employeeApiData = {
+ *     items: [
+ *       {
+ *         item: {
+ *           id: '616a0cf1-6410-43d0-994b-6bb88fb6c6ea',
+ *           status: 'accepted',
+ *           shop: {
+ *             item: {
+ *               name: 'HS 과일주스',
+ *             },
+ *           },
+ *           notice: {
+ *             item: {
+ *               hourlyPay: 15000,
+ *               startsAt: '2023-01-12T10:00:00.000Z',
+ *               workhour: 2,
+ *             },
+ *           },
+ *         },
+ *       },
+ *       // ... 더 많은 items
+ *     ],
+ *   };
+ *
+ *   // transformEmployeeData 유틸 함수로 변환
+ *   const employeeData = transformEmployeeData(employeeApiData.items);
+ *   // 결과: [{ id: '616a0cf1-...', shop: 'HS 과일주스', workhour: '2023-01-12 10:00 ~ 12:00 (2시간)', hourlyPay: '15,000원', status: 'accepted' }]
+ *
+ *   return (
+ *     <Table
+ *       data={employeeData}
+ *       rowKey="id"
+ *     />
+ *   );
+ * };
  */
 
-const LIMIT = 5;
+// 페이지네이션: 한 페이지당 표시할 데이터 개수 (5개)
+const LIMIT: number = 5;
 
 // 인덱스 기반 너비 설정 (0번째, 1번째, 2번째, 3번째 컬럼)
 const COLUMN_WIDTH_CLASSES: Record<number, string> = {
@@ -42,23 +116,25 @@ const COLUMN_WIDTH_CLASSES: Record<number, string> = {
   3: 'w-[162px] min-w-[162px] sm:w-[220px] sm:min-w-[220px] lg:w-[236px] lg:min-w-[236px]',
 };
 
-interface Column {
-  key: string;
-  label: string;
-  fixed?: 'right';
-}
+// 사장님 전용 : 신청 대기 상태일 때 표시되는 승인/거절 버튼의 기본 스타일
+const STATUS_BTN_CLASSNAME: string =
+  'py-2 px-3 justify-center items-center rounded-md border text-xs font-normal leading-4 text-center sm:py-2.5 sm:px-5 sm:text-sm sm:font-bold sm:leading-normal';
 
 interface TableProps<T extends Record<string, React.ReactNode>> {
-  columns: Column[];
   data: T[];
   rowKey?: keyof T;
+  onApprove?: (id: string) => void;
+  onReject?: (id: string) => void;
 }
 
 const Table = <T extends Record<string, React.ReactNode>>({
-  columns,
   data,
   rowKey = 'id' as keyof T,
-}: TableProps<T>) => {
+  onApprove,
+  onReject,
+}: TableProps<T>): React.JSX.Element => {
+  const isEmployer = useIsEmployer();
+  const columns = isEmployer ? EMPLOYER_COLUMNS : EMPLOYEE_COLUMNS;
   const [page, setPage] = useState(1);
 
   // useMemo로 displayData 메모이제이션
@@ -74,14 +150,13 @@ const Table = <T extends Record<string, React.ReactNode>>({
     }),
     [columns]
   );
-
   // 인덱스 기반으로 컬럼 너비 클래스 반환
   const getColumnClassName = (colIndex: number) => {
     return COLUMN_WIDTH_CLASSES[colIndex] || 'w-auto';
   };
 
   // 헤더 렌더링 함수
-  const renderThead = (cols: Column[], startIndex: number = 0) => (
+  const renderThead = (cols: readonly Column[], startIndex: number = 0) => (
     <thead>
       <tr className="bg-red-10">
         {cols.map((col, idx) => (
@@ -96,39 +171,55 @@ const Table = <T extends Record<string, React.ReactNode>>({
   );
 
   // 바디 렌더링 함수
-  const renderTbody = (cols: Column[], startIndex: number = 0) => (
-    <tbody>
-      {displayData.map((row, idx) => {
-        // rowKey가 있고 해당 값이 존재하면 사용, 아니면 인덱스 사용
-        const key = row[rowKey] ? String(row[rowKey]) : idx;
-        return (
-          <tr key={key} className="border-gray-20 border-b">
-            {cols.map((col, colIdx) => (
-              <td
-                key={col.key}
-                className={`${getColumnClassName(startIndex + colIdx)} h-[46px] px-3 text-[14px] leading-[22px] sm:text-[16px] md:h-[69px] lg:h-[69px]`}>
-                {/* TODO: 사장님일 때 높이 변경
-                    사장님: h-[46px] md:h-[91px] lg:h-[91px]
-                    알바님: h-[46px] md:h-[69px] lg:h-[69px] (현재 설정)
-                */}
-                {col.key === 'status' ? (
-                  // TODO : 사장님/알바님에 따른 텍스트 또는 버튼 표시
-                  // status="" 일 때, 사장님은 거절하기 & 승인하기 버튼 표시 / 알바님는 "대기중"
-                  <Badge status={row[col.key] as BadgeStatus} />
-                ) : (
-                  row[col.key]
-                )}
-              </td>
-            ))}
-          </tr>
-        );
-      })}
-    </tbody>
-  );
+  const renderTbody = (cols: readonly Column[], startIndex: number = 0) => {
+    return (
+      <tbody>
+        {displayData.map((row, idx) => {
+          // rowKey가 있고 해당 값이 존재하면 사용, 아니면 인덱스 사용
+          const key = row[rowKey] ? String(row[rowKey]) : idx;
+          const rowId = String(row[rowKey]);
+
+          return (
+            <tr key={key} className="border-gray-20 border-b">
+              {cols.map((col, colIdx) => (
+                <td
+                  key={col.key}
+                  className={`${getColumnClassName(startIndex + colIdx)} h-[46px] px-2 text-[14px] leading-[22px] sm:px-3 sm:text-[16px] ${
+                    isEmployer ? 'sm:h-[91px]' : 'sm:h-[69px]'
+                  }`}>
+                  {col.key === 'status' ? (
+                    // 사장님이고 status가 ''(대기중)일 때 버튼 표시
+                    isEmployer && row[col.key] === '' ? (
+                      <div className="flex items-center justify-between py-[7px]">
+                        <button
+                          onClick={() => onReject?.(rowId)}
+                          className={`${STATUS_BTN_CLASSNAME} border-red-50 text-red-50 hover:bg-red-50 hover:text-white`}>
+                          거절하기
+                        </button>
+                        <button
+                          onClick={() => onApprove?.(rowId)}
+                          className={`${STATUS_BTN_CLASSNAME} border-blue-20 text-blue-20 hover:bg-blue-20 hover:text-white`}>
+                          승인하기
+                        </button>
+                      </div>
+                    ) : (
+                      <Badge status={row[col.key] as BadgeStatus} />
+                    )
+                  ) : (
+                    row[col.key]
+                  )}
+                </td>
+              ))}
+            </tr>
+          );
+        })}
+      </tbody>
+    );
+  };
 
   // 테이블 렌더링 함수
   const renderTable = (
-    cols: Column[],
+    cols: readonly Column[],
     startIndex: number = 0,
     className: string = ''
   ) => (
@@ -140,7 +231,7 @@ const Table = <T extends Record<string, React.ReactNode>>({
 
   return (
     <div className="@container mx-auto w-full max-w-[964px] font-normal text-black">
-      <div className="border-gray-20 overflow-hidden rounded-xl border">
+      <div className="border-gray-20 overflow-hidden rounded-xl border bg-white">
         {/* 부모 요소의 크기가 964px 이상 */}
         <div className="hidden @[964px]:block">
           {renderTable(columns, 0, 'w-full')}

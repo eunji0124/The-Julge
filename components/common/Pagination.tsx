@@ -41,7 +41,7 @@ const Pagination = ({ total, limit, page, setPage }: PaginationProps) => {
   if (numPages <= 1) return null;
 
   return (
-    <nav className="mt-4 flex items-center justify-center gap-1 sm:gap-2">
+    <nav className="flex items-center justify-center gap-1 sm:gap-2">
       {/* Prev */}
       <button
         onClick={() => setPage(page - 1)}

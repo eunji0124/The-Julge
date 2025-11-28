@@ -211,9 +211,9 @@ const Signup = () => {
           setApiMessage(message || API_MESSAGE.INVALID_INPUT);
           setIsModalOpen(true);
         }
-        // 409, 400 외의 다른 Axios 에러는 api/client.ts의 인터셉터에서 공통으로 처리하므로 여기서는 모달을 띄우지 않습니다.
+        // 409, 400 외의 다른 Axios 에러는 api/client.ts의 인터셉터에서 공통으로 처리하므로 여기서는 처리하지 않음
       } else {
-        // Axios 에러가 아니거나, 응답이 없는 예상치 못한 에러는 별도 처리합니다.
+        // Axios 에러가 아니거나, 응답이 없는 예상치 못한 에러는 별도 처리
         setApiMessage(API_MESSAGE.PROCESSING_ERROR);
         setIsModalOpen(true);
       }

@@ -37,7 +37,7 @@ const Post = ({
   return (
     <div className={`${postClasses.container()} ${className || ''}`}>
       {/* 이미지 + 오버레이 */}
-      <div className="relative h-[84px] overflow-hidden rounded-[12px] sm:h-[160px]">
+      <div className="h-[84px] overflow-hidden rounded-[12px] sm:h-[160px]">
         <PostImage
           imageUrl={imageUrl}
           name={name}

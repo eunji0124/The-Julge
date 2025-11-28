@@ -53,6 +53,7 @@
 @theme {
   /* gray */
   --color-black: #111322;
+  --color-gray-60: #333236;
   --color-gray-50: #7d7986;
   --color-gray-40: #a4a1aa;
   --color-gray-30: #cbc9cf;
@@ -62,10 +63,11 @@
   --color-white: #ffffff;
 
   /* red */
+  --color-red-50: #ea3c12;
   --color-red-40: #ff4040;
   --color-red-30: #ff8d72;
   --color-red-20: #ffaf9b;
-  --color-red-10: #ffefe7;
+  --color-red-10: #ffebe7;
 
   /* blue */
   --color-blue-20: #0080ff;
@@ -74,6 +76,10 @@
   /* green */
   --color-green-20: #20481e;
   --color-green-10: #d4f7d4;
+
+  /* purple */
+  --color-purple-20: #5534da;
+  --color-purple-10: #a88fff;
 
   /* kakao */
   --color-kakao: #fee500;

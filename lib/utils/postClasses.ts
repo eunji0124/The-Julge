@@ -29,20 +29,24 @@ export const postClasses = {
       isActive: true,
     },
   }),
-  text: cva(
-    "font-['Spoqa Han Sans Neo']  text-[12px] sm:text-[14px] font-[400]",
-    {
-      variants: {
-        isActive: {
-          true: 'text-[var(--color-gray-50)]',
-          false: 'text-[var(--color-gray-30)]',
-        },
+  text: cva("font-['Spoqa Han Sans Neo'] font-[400]", {
+    variants: {
+      isActive: {
+        true: 'text-[var(--color-gray-50)]',
+        false: 'text-[var(--color-gray-30)]',
       },
-      defaultVariants: {
-        isActive: true,
+      size: {
+        sm: 'text-[12px] sm:text-[14px]',
+        md: 'text-[14px] sm:text-[16px]',
+        lg: 'text-[16px] sm:text-[20px]',
+        xl: 'text-[18px] sm:text-[22px]',
       },
-    }
-  ),
+    },
+    defaultVariants: {
+      isActive: true,
+      size: 'sm',
+    },
+  }),
   wage: cva(
     'font-["Spoqa Han Sans Neo"] text-[18px] sm:text-[24px] font-[600] tracking-[0.02em] leading-[1]',
     {
@@ -51,9 +55,14 @@ export const postClasses = {
           true: 'text-[var(--color-black)]',
           false: 'text-[var(--color-gray-30)]',
         },
+        size: {
+          sm: 'text-[18px] sm:text-[24px]',
+          md: 'text-[24px] sm:text-[28px]',
+        },
       },
       defaultVariants: {
         isActive: true,
+        size: 'sm',
       },
     }
   ),

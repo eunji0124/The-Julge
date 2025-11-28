@@ -1,9 +1,10 @@
 import { useRouter } from 'next/router';
 
 import { useMutation } from '@tanstack/react-query';
-import axios, { isAxiosError } from 'axios';
+import { isAxiosError } from 'axios';
 import { toast } from 'react-toastify';
 
+import token from '@/api/token';
 import { ApiErrorResponse, LoginRequest } from '@/api/types';
 import { useAuthStore } from '@/store/useAuthStore';
 
@@ -20,17 +21,16 @@ const useLogin = () => {
 
   return useMutation({
     mutationFn: async (data: LoginRequest) => {
-      const response = await axios.post('/api/auth/login', data, {
-        withCredentials: true, // 쿠키 포함
-      });
-      return response.data;
+      const response = await token.login(data);
+      return response;
     },
 
     onSuccess: (data) => {
-      // 사용자 정보만 Zustand에 저장
-      setAuth(data.user);
+      const { token, user } = data.item;
 
-      // 로그인 성공 후 홈으로 리다이렉트
+      // 토큰과 사용자 정보를 Zustand에 저장
+      setAuth(token, user.item);
+
       router.push('/');
     },
 

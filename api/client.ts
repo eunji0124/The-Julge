@@ -31,7 +31,6 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true, // 쿠키 포함
 });
 
 /**
@@ -41,7 +40,23 @@ const apiClient = axios.create({
  */
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // 쿠키는 브라우저가 자동으로 전송
+    // Zustand에서 토큰 가져오기
+    if (typeof window !== 'undefined') {
+      const authStorage = localStorage.getItem('auth-storage');
+      if (authStorage) {
+        try {
+          const { state } = JSON.parse(authStorage);
+          const token = state?.token;
+
+          if (token) {
+            config.headers.Authorization = `Bearer ${token}`; // 토큰을 헤더에 추가
+          }
+        } catch (error) {
+          console.error('토큰 파싱 에러:', error);
+        }
+      }
+    }
+
     return config;
   },
   (error: AxiosError) => {
@@ -73,12 +88,13 @@ apiClient.interceptors.response.use(
       // 인증 에러
       toast.error('로그인이 필요합니다.');
 
-      // 401 에러 시 로그인 페이지로 리디렉션
-      if (
-        typeof window !== 'undefined' &&
-        window.location.pathname !== '/login'
-      ) {
-        window.location.assign('/login');
+      if (typeof window !== 'undefined') {
+        // Zustand 스토어 초기화
+        localStorage.removeItem('auth-token');
+
+        if (window.location.pathname !== '/login') {
+          window.location.assign('/login');
+        }
       }
       return Promise.reject(error);
     }

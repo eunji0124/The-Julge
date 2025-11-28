@@ -150,9 +150,31 @@ const Table = <T extends Record<string, React.ReactNode>>({
     }),
     [columns]
   );
+
   // 인덱스 기반으로 컬럼 너비 클래스 반환
   const getColumnClassName = (colIndex: number) => {
     return COLUMN_WIDTH_CLASSES[colIndex] || 'w-auto';
+  };
+
+  const renderStatusCell = (row: T, rowId: string) => {
+    // 사장님이고 status가 ''(대기중)일 때 버튼 표시
+    if (isEmployer && row.status === '') {
+      return (
+        <div className="flex items-center justify-between py-[7px]">
+          <button
+            onClick={() => onReject?.(rowId)}
+            className={`${STATUS_BTN_CLASSNAME} border-red-50 text-red-50 hover:bg-red-50 hover:text-white`}>
+            거절하기
+          </button>
+          <button
+            onClick={() => onApprove?.(rowId)}
+            className={`${STATUS_BTN_CLASSNAME} border-blue-20 text-blue-20 hover:bg-blue-20 hover:text-white`}>
+            승인하기
+          </button>
+        </div>
+      );
+    }
+    return <Badge status={row.status as BadgeStatus} />;
   };
 
   // 헤더 렌더링 함수
@@ -174,9 +196,9 @@ const Table = <T extends Record<string, React.ReactNode>>({
   const renderTbody = (cols: readonly Column[], startIndex: number = 0) => {
     return (
       <tbody>
-        {displayData.map((row, idx) => {
+        {displayData.map((row) => {
           // rowKey가 있고 해당 값이 존재하면 사용, 아니면 인덱스 사용
-          const key = row[rowKey] ? String(row[rowKey]) : idx;
+          const key = String(row[rowKey]);
           const rowId = String(row[rowKey]);
 
           return (
@@ -187,27 +209,9 @@ const Table = <T extends Record<string, React.ReactNode>>({
                   className={`${getColumnClassName(startIndex + colIdx)} h-[46px] px-2 text-[14px] leading-[22px] sm:px-3 sm:text-[16px] ${
                     isEmployer ? 'sm:h-[91px]' : 'sm:h-[69px]'
                   }`}>
-                  {col.key === 'status' ? (
-                    // 사장님이고 status가 ''(대기중)일 때 버튼 표시
-                    isEmployer && row[col.key] === '' ? (
-                      <div className="flex items-center justify-between py-[7px]">
-                        <button
-                          onClick={() => onReject?.(rowId)}
-                          className={`${STATUS_BTN_CLASSNAME} border-red-50 text-red-50 hover:bg-red-50 hover:text-white`}>
-                          거절하기
-                        </button>
-                        <button
-                          onClick={() => onApprove?.(rowId)}
-                          className={`${STATUS_BTN_CLASSNAME} border-blue-20 text-blue-20 hover:bg-blue-20 hover:text-white`}>
-                          승인하기
-                        </button>
-                      </div>
-                    ) : (
-                      <Badge status={row[col.key] as BadgeStatus} />
-                    )
-                  ) : (
-                    row[col.key]
-                  )}
+                  {col.key === 'status'
+                    ? renderStatusCell(row, rowId)
+                    : row[col.key]}
                 </td>
               ))}
             </tr>

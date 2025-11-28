@@ -1,9 +1,8 @@
-// pages/notices/index.tsx
 import { useState, useEffect, useCallback, useMemo } from 'react';
 
 import { useRouter } from 'next/router';
 
-import { fetchNoticeList } from '@/api/notices';
+import { fetchNoticeList, FetchNoticeListParams } from '@/api/notices';
 import Dropdown from '@/components/common/Dropdown';
 import DetailFilterModal, {
   FilterValues,
@@ -40,8 +39,7 @@ const NoticeListPage = () => {
 
   // UI 상태
   const [sortType, setSortType] = useState<SortType>('마감임박순');
-  const [isSearchSortOpen, setIsSearchSortOpen] = useState(false);
-  const [isAllSortOpen, setIsAllSortOpen] = useState(false);
+  const [isSortOpen, setIsSortOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [filterValues, setFilterValues] = useState<FilterValues>({
     locations: [],
@@ -54,7 +52,6 @@ const NoticeListPage = () => {
   const [searchResults, setSearchResults] = useState<TransformedNotice[]>([]);
   const [customNotices, setCustomNotices] = useState<TransformedNotice[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [_totalCount, setTotalCount] = useState(0);
 
   // 검색어 정규화
   const searchTerm = useMemo(() => {
@@ -126,8 +123,7 @@ const NoticeListPage = () => {
 
       const transformed = data.items
         .map(({ item }) => transformNoticeData(item))
-        .sort((a, b) => b.wage - a.wage)
-        .slice(0, 3);
+        .sort((a, b) => b.wage - a.wage);
 
       setCustomNotices(transformed);
     } catch (error) {
@@ -145,7 +141,7 @@ const NoticeListPage = () => {
     setIsLoading(true);
     try {
       // API 파라미터 구성
-      const params: any = {
+      const params: FetchNoticeListParams = {
         offset: (allPage - 1) * ITEMS_PER_PAGE,
         limit: ITEMS_PER_PAGE,
       };
@@ -175,7 +171,7 @@ const NoticeListPage = () => {
     } catch (error) {
       console.error('공고 목록 로딩 실패:', error);
       setAllNotices([]);
-      setTotalCount(0);
+      setTotalAllCount(0);
     } finally {
       setIsLoading(false);
     }
@@ -190,7 +186,7 @@ const NoticeListPage = () => {
 
     setIsLoading(true);
     try {
-      const params: any = {
+      const params: FetchNoticeListParams = {
         offset: (searchPage - 1) * ITEMS_PER_PAGE,
         limit: ITEMS_PER_PAGE,
         keyword: searchTerm,
@@ -221,7 +217,7 @@ const NoticeListPage = () => {
     } catch (error) {
       console.error('검색 결과 로딩 실패:', error);
       setSearchResults([]);
-      setTotalCount(0);
+      setTotalSearchCount(0);
     } finally {
       setIsLoading(false);
     }
@@ -285,16 +281,11 @@ const NoticeListPage = () => {
   // 정렬 선택 핸들러
   const handleSortSelect = useCallback((value: string) => {
     setSortType(value as SortType);
-    setIsSearchSortOpen(false);
-    setIsAllSortOpen(false);
+    setIsSortOpen(false);
   }, []);
 
-  const handleSearchDropdownToggle = useCallback(() => {
-    setIsSearchSortOpen((v) => !v);
-  }, []);
-
-  const handleAllDropdownToggle = useCallback(() => {
-    setIsAllSortOpen((v) => !v);
+  const handleSortDropdownToggle = useCallback(() => {
+    setIsSortOpen((v) => !v);
   }, []);
 
   return (
@@ -364,7 +355,7 @@ const NoticeListPage = () => {
                 <div className="relative flex items-center gap-2">
                   <div className="relative">
                     <button
-                      onClick={handleSearchDropdownToggle}
+                      onClick={handleSortDropdownToggle}
                       className="flex h-[42px] items-center gap-2 rounded-[10px] border border-gray-300 px-4 text-sm outline-none hover:border-gray-400">
                       <span>{sortType}</span>
                       <svg
@@ -372,7 +363,7 @@ const NoticeListPage = () => {
                         height="16"
                         viewBox="0 0 16 16"
                         fill="none"
-                        className={`transition-transform ${isSearchSortOpen ? 'rotate-180' : ''}`}>
+                        className={`transition-transform ${isSortOpen ? 'rotate-180' : ''}`}>
                         <path
                           d="M4 6L8 10L12 6"
                           stroke="currentColor"
@@ -382,12 +373,12 @@ const NoticeListPage = () => {
                         />
                       </svg>
                     </button>
-                    {isSearchSortOpen && (
+                    {isSortOpen && (
                       <Dropdown
                         items={SORT_OPTIONS}
                         selected={sortType}
                         onSelect={handleSortSelect}
-                        onClose={() => setIsSearchSortOpen(false)}
+                        onClose={() => setIsSortOpen(false)}
                       />
                     )}
                   </div>
@@ -481,7 +472,7 @@ const NoticeListPage = () => {
                   <div className="relative flex items-center gap-2">
                     <div className="relative">
                       <button
-                        onClick={handleAllDropdownToggle}
+                        onClick={handleSortDropdownToggle}
                         className="flex h-[42px] items-center gap-2 rounded-[10px] border border-gray-300 px-4 text-sm outline-none hover:border-gray-400">
                         <span>{sortType}</span>
                         <svg
@@ -489,7 +480,7 @@ const NoticeListPage = () => {
                           height="16"
                           viewBox="0 0 16 16"
                           fill="none"
-                          className={`transition-transform ${isAllSortOpen ? 'rotate-180' : ''}`}>
+                          className={`transition-transform ${isSortOpen ? 'rotate-180' : ''}`}>
                           <path
                             d="M4 6L8 10L12 6"
                             stroke="currentColor"
@@ -499,12 +490,12 @@ const NoticeListPage = () => {
                           />
                         </svg>
                       </button>
-                      {isAllSortOpen && (
+                      {isSortOpen && (
                         <Dropdown
                           items={SORT_OPTIONS}
                           selected={sortType}
                           onSelect={handleSortSelect}
-                          onClose={() => setIsAllSortOpen(false)}
+                          onClose={() => setIsSortOpen(false)}
                         />
                       )}
                     </div>

@@ -33,7 +33,7 @@ export interface NoticeListResponse {
   hasNext: boolean;
   items: {
     item: NoticeItem;
-    links: any[];
+    links: unknown[];
   }[];
 }
 

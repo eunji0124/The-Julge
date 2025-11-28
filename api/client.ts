@@ -6,6 +6,8 @@ import axios, {
 } from 'axios';
 import { toast } from 'react-toastify';
 
+import { useAuthStore } from '@/store/useAuthStore';
+
 /**
  * API 베이스 URL 환경 변수
  * 개발 환경에서 누락 시 경고 표시
@@ -20,10 +22,9 @@ if (process.env.NODE_ENV === 'development' && !BASE_URL) {
 }
 
 /**
- * Axios 인스턴스 (쿠키 방식)
+ * Axios 인스턴스 (토큰 방식)
  * - 기본 URL 및 공통 설정 적용
  * - 5초 타임아웃 설정
- * - withCredentials: true (쿠키 자동 전송)
  */
 const apiClient = axios.create({
   baseURL: BASE_URL,
@@ -31,17 +32,33 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true, // 쿠키 포함
 });
 
 /**
  * 요청 인터셉터
  * - 모든 요청 전에 실행
- * - 인증 토큰 추가 등의 전처리 수행
+ * - Zustand에서 토큰을 가져와 Authorization 헤더에 추가
  */
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // 쿠키는 브라우저가 자동으로 전송
+    // Zustand에서 토큰 가져오기
+    // 인터셉터 내부에서 동적으로 가져와야 최신 토큰이 반영됨
+    if (typeof window !== 'undefined') {
+      const authStorage = localStorage.getItem('auth-token');
+      if (authStorage) {
+        try {
+          const { state } = JSON.parse(authStorage);
+          const token = state?.token;
+
+          if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+          }
+        } catch (error) {
+          console.error('토큰 파싱 에러:', error);
+        }
+      }
+    }
+
     return config;
   },
   (error: AxiosError) => {
@@ -73,12 +90,14 @@ apiClient.interceptors.response.use(
       // 인증 에러
       toast.error('로그인이 필요합니다.');
 
-      // 401 에러 시 로그인 페이지로 리디렉션
-      if (
-        typeof window !== 'undefined' &&
-        window.location.pathname !== '/login'
-      ) {
-        window.location.assign('/login');
+      // 401 에러 시 토큰 제거 및 로그인 페이지로 리디렉션
+      if (typeof window !== 'undefined') {
+        // Zustand 스토어 초기화
+        useAuthStore.getState().clearAuth();
+
+        if (window.location.pathname !== '/login') {
+          window.location.assign('/login');
+        }
       }
       return Promise.reject(error);
     }

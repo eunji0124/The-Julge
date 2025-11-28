@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 import { User } from '@/api/types';
 
@@ -6,29 +7,44 @@ import { User } from '@/api/types';
  * 인증 상태 타입 정의
  */
 interface AuthState {
+  token: string | null;
   user: User | null;
   isAuthenticated: boolean;
-  setAuth: (user: User) => void;
+  setAuth: (token: string, user: User) => void;
   clearAuth: () => void;
 }
 
 /**
- * 인증 상태 관리 스토어 (쿠키 방식)
- * - 토큰은 HttpOnly Cookie에 저장 (서버가 관리, XSS 방지)
- * - 사용자 정보만 클라이언트 메모리(Zustand)에 저장
- * - 새로고침 시 Zustand 상태가 초기화되므로 서버에서 사용자 정보 재조회 필요
+ * 인증 상태 관리 스토어 (토큰 기반)
+ * - token을 localStorage에 persist하여 새로고침 시에도 유지
+ * - 사용자 정보도 함께 저장
+ * - API 요청 시 token을 Authorization 헤더에 포함
  */
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  isAuthenticated: false,
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      token: null,
+      user: null,
+      isAuthenticated: false,
 
-  // 로그인: 사용자 정보만 저장
-  setAuth(user: User) {
-    set({ user, isAuthenticated: true });
-  },
+      // 로그인: 토큰과 사용자 정보 저장
+      setAuth(token: string, user: User) {
+        set({ token, user, isAuthenticated: true });
+      },
 
-  // 로그아웃: 사용자 정보 제거
-  clearAuth() {
-    set({ user: null, isAuthenticated: false });
-  },
-}));
+      // 로그아웃: 토큰과 사용자 정보 제거
+      clearAuth() {
+        set({ token: null, user: null, isAuthenticated: false });
+      },
+    }),
+    {
+      name: 'auth-token', // localStorage 키 이름
+      // token과 user만 persist
+      partialize: (state) => ({
+        token: state.token,
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
+      }),
+    }
+  )
+);

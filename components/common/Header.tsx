@@ -97,14 +97,16 @@ const Header = () => {
   /**
    * 네비게이션 아이템을 렌더링하는 함수
    * @param {NavItem} item - 렌더링할 네비게이션 아이템
-   * @param {number} index - 배열 인덱스 (key prop용)
    * @returns {JSX.Element} 렌더링된 컴포넌트
    */
-  const renderNavItem = (item: NavItem, index: number) => {
+  const renderNavItem = (item: NavItem) => {
     // Link 컴포넌트 렌더링 (href 속성이 있는 경우)
     if ('href' in item) {
       return (
-        <Link key={index} href={item.href} className={`${TEXT_BUTTON_STYLE}`}>
+        <Link
+          key={item.label}
+          href={item.href}
+          className={`${TEXT_BUTTON_STYLE}`}>
           {item.label}
         </Link>
       );
@@ -114,7 +116,7 @@ const Header = () => {
     if (item.isIcon) {
       return (
         <button
-          key={index}
+          key={item.label}
           onClick={() => console.log('알림')}
           className="inline-flex h-5 w-5 items-center justify-center sm:h-6 sm:w-6"
           aria-label={item.label}>
@@ -132,7 +134,7 @@ const Header = () => {
     // 텍스트 버튼 렌더링 (로그아웃 버튼)
     return (
       <button
-        key={index}
+        key={item.label}
         onClick={handleLogout}
         className={`${TEXT_BUTTON_STYLE}`}>
         {item.label}

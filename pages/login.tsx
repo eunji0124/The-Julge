@@ -125,10 +125,10 @@ const Login = () => {
         <title>로그인 | The-Julge</title>
         <meta name="description" content="로그인 페이지입니다" />
       </Head>
-      <div className="flex justify-center">
+      <div className="flex h-screen w-screen justify-center p-5">
         <div className="flex w-full max-w-[350px] flex-col items-center justify-center">
           {/* 로고 */}
-          <Link href="/" className="mt-[139px] md:mt-[279px] lg:mt-[312px]">
+          <Link href="/">
             <Image
               src="/images/logo.svg"
               alt="The Julge 로고"

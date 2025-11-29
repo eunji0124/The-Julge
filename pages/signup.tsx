@@ -228,10 +228,10 @@ const Signup = () => {
         <title>회원가입 | The-Julge</title>
         <meta name="description" content="회원가입 페이지입니다" />
       </Head>
-      <div className="flex justify-center">
+      <div className="flex h-screen w-screen justify-center p-5">
         <div className="flex w-full max-w-[350px] flex-col items-center justify-center">
           {/* 로고 */}
-          <Link href="/" className="mt-[73px] md:mt-[139px] lg:mt-[156px]">
+          <Link href="/">
             <Image
               src="/images/logo.svg"
               alt="The Julge 로고"

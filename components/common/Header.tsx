@@ -6,21 +6,26 @@ import { UserType } from '@/api/types';
 import { useIsEmployer, useIsEmployee } from '@/hooks/useCheckUserType';
 import { useAuthStore } from '@/store/useAuthStore';
 
+// 사용자 역할 타입 정의 (게스트, 사장님, 알바님)
 type UserRole = 'GUEST' | UserType.EMPLOYER | UserType.EMPLOYEE;
 
+// 링크형 네비게이션 아이템 (href 속성 포함)
 type NavLink = {
   label: string;
   href: string;
 };
 
+// 버튼형 네비게이션 아이템 (action 또는 아이콘 속성 포함)
 type NavButton = {
   label: string;
   action?: 'logout';
   isIcon?: boolean;
 };
 
+// 네비게이션 아이템 통합 타입
 type NavItem = NavLink | NavButton;
 
+// 사용자 역할별 네비게이션 메뉴 구성
 const NAVIGATION: Record<UserRole, NavItem[]> = {
   GUEST: [
     { label: '로그인', href: '/login' },
@@ -38,17 +43,22 @@ const NAVIGATION: Record<UserRole, NavItem[]> = {
   ],
 };
 
+// 텍스트 버튼 공통 스타일
 const TEXT_BUTTON_STYLE =
   'text-sm font-bold leading-normal sm:text-base sm:font-bold sm:leading-5';
 
 const Header = () => {
   const router = useRouter();
 
+  // 인증 상태 및 함수 가져오기
   const { isAuthenticated, clearAuth } = useAuthStore();
   const isEmployer = useIsEmployer();
   const isEmployee = useIsEmployee();
 
-  // 사용자 역할 결정
+  /**
+   * 현재 사용자의 역할을 판별하는 함수
+   * @returns {UserRole} 사용자 역할 (GUEST, EMPLOYER, EMPLOYEE)
+   */
   const getUserRole = (): UserRole => {
     if (!isAuthenticated) return 'GUEST';
     if (isEmployer) return UserType.EMPLOYER;
@@ -58,6 +68,11 @@ const Header = () => {
 
   const userRole = getUserRole();
 
+  /**
+   * 사용자 역할에 따른 텍스트 버튼 스타일 클래스 반환
+   * - GUEST: 더 넓은 간격 (gap-10)
+   * - 인증 사용자: 반응형 간격 (gap-3 → gap-10)
+   */
   const getTextButtonClass = () => {
     console.log(userRole);
     return userRole === 'GUEST'
@@ -65,14 +80,24 @@ const Header = () => {
       : `${TEXT_BUTTON_STYLE} sm:gap-3 lg:gap-10`;
   };
 
-  // 로그아웃
+  /**
+   * 로그아웃 처리 함수
+   * - 인증 정보 초기화
+   * - 홈 페이지로 리다이렉트
+   */
   const handleLogout = () => {
     clearAuth();
-    // 공고 리스트 페이지로 이동
     router.push('/');
   };
 
+  /**
+   * 네비게이션 아이템을 렌더링하는 함수
+   * @param {NavItem} item - 렌더링할 네비게이션 아이템
+   * @param {number} index - 배열 인덱스 (key prop용)
+   * @returns {JSX.Element} 렌더링된 컴포넌트
+   */
   const renderNavItem = (item: NavItem, index: number) => {
+    // Link 컴포넌트 렌더링 (href 속성이 있는 경우)
     if ('href' in item) {
       return (
         <Link key={index} href={item.href} className={getTextButtonClass()}>
@@ -81,7 +106,7 @@ const Header = () => {
       );
     }
 
-    // 아이콘 버튼 (알림)
+    // 아이콘 버튼 렌더링 (알림 아이콘)
     if (item.isIcon) {
       return (
         <button
@@ -100,7 +125,7 @@ const Header = () => {
       );
     }
 
-    // 텍스트 버튼 (로그아웃)
+    // 텍스트 버튼 렌더링 (로그아웃 버튼)
     return (
       <button
         key={index}
@@ -113,8 +138,13 @@ const Header = () => {
 
   return (
     <header className="w-full bg-white">
+      {/* 
+        네비게이션 레이아웃:
+        - 모바일: 2열 2행 그리드 (로고/버튼 | 검색)
+        - 태블릿 이상: 3열 1행 그리드 (로고 | 검색 | 버튼)
+      */}
       <nav className="grid grid-cols-[auto_1fr] grid-rows-[min-content_min-content] gap-y-4 px-5 py-2.5 sm:grid-cols-[auto_auto_auto] sm:gap-y-0 sm:px-8 sm:py-[15px]">
-        {/* 로고 */}
+        {/* 로고 영역 */}
         <Link
           href="/"
           className="col-start-1 row-start-1 inline-flex h-[30px] w-fit items-center justify-center sm:h-10">
@@ -128,7 +158,7 @@ const Header = () => {
           />
         </Link>
 
-        {/* 검색 */}
+        {/* 검색 입력 영역 */}
         <search className="bg-gray-10 col-span-2 col-start-1 row-start-2 mx-auto w-full max-w-[450px] rounded-[10px] sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:mx-auto">
           <div className="flex w-full items-center gap-2 p-2 sm:items-start sm:gap-2.5 sm:p-2.5">
             <Image
@@ -146,7 +176,7 @@ const Header = () => {
           </div>
         </search>
 
-        {/* 우측 버튼들 */}
+        {/* 우측 네비게이션 버튼 영역 (로그인/로그아웃/알림 등) */}
         <div className="col-start-2 row-start-1 ml-auto inline-flex w-fit items-center justify-end gap-4 sm:col-start-3 sm:ml-0 sm:justify-self-end">
           {NAVIGATION[userRole].map(renderNavItem)}
         </div>

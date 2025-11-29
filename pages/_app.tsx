@@ -9,6 +9,9 @@ import { ToastContainer } from 'react-toastify';
 
 import Layout from '@/components/layout/Layout';
 
+// 레이아웃을 제외할 페이지 경로 정의 상수
+const EXCLUDED_PATHS = ['/login', '/signup'];
+
 /**
  * Next.js App 컴포넌트
  * - React Query Provider 설정
@@ -35,8 +38,7 @@ const App = ({ Component, pageProps }: AppProps) => {
   );
 
   // 레이아웃을 제외할 페이지 경로
-  const excludedPaths = ['/login', '/signup'];
-  const shouldShowLayout = !excludedPaths.includes(router.pathname);
+  const shouldShowLayout = !EXCLUDED_PATHS.includes(router.pathname);
 
   return (
     <QueryClientProvider client={queryClient}>

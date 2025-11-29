@@ -52,7 +52,7 @@ const PostBanner = ({
   return (
     <div className="mx-auto flex w-[964px] gap-6 rounded-[12px] border border-[var(--color-gray-20)] bg-[var(--color-white)] p-6 max-[744px]:w-[680px] max-[744px]:flex-col max-[744px]:gap-4 max-[375px]:w-[351px] max-[375px]:gap-3 max-[375px]:p-5">
       {/* 이미지 영역 */}
-      <div className="h-[312px] w-[539px] max-[744px]:h-[360.858px] max-[744px]:w-full max-[375px]:h-[177.71px] max-[375px]:w-full">
+      <div className="h-[312px] w-full max-w-[539px] max-[744px]:h-[361px] max-[744px]:max-w-full max-[375px]:h-[178px]">
         <PostImage imageUrl={imageUrl} name={name} isColor={true} />
       </div>
 

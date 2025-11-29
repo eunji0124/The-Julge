@@ -16,9 +16,6 @@ const users = {
     const response = await api.post<SignupResponse>('/users', data);
     return response;
   },
-  getUser: async (user_id: string) => {
-    return await api.get<{ item: User }>(`/users/${user_id}`);
-  },
 };
 
 export default users;

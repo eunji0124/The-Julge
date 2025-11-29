@@ -50,6 +50,7 @@ export interface User {
   phone?: string;
   address?: string;
   bio?: string;
+  shop?: { item: { id: string } & ShopRequest };
 }
 
 /**
@@ -88,7 +89,6 @@ export interface LoginResponse {
       href: string;
     };
   };
-  links: ApiLink[];
 }
 
 /**

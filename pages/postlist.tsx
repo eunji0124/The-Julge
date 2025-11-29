@@ -254,17 +254,11 @@ const NoticeListPage = () => {
     buildFilterParams,
   ]);
 
-  // 필터 변경 시 페이지 리셋
+  // 필터 또는 정렬 변경 시 페이지 리셋
   useEffect(() => {
     setAllPage(1);
     setSearchPage(1);
-  }, [filterValues]);
-
-  // 정렬 변경 시 페이지 리셋
-  useEffect(() => {
-    setAllPage(1);
-    setSearchPage(1);
-  }, [sortType]);
+  }, [filterValues, sortType]);
 
   // 전체 공고 로드
   useEffect(() => {

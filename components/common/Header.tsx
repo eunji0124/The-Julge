@@ -6,6 +6,22 @@ import { UserType } from '@/api/types';
 import { useIsEmployer, useIsEmployee } from '@/hooks/useCheckUserType';
 import { useAuthStore } from '@/store/useAuthStore';
 
+/**
+ * Header 사용 예제
+ *
+ * import Footer from '@/components/Header';
+ *
+ * function Layout({ children }) {
+ *   return (
+ *     <div>
+ *       <Header />
+ *       <main>{children}</main>
+ *     </div>
+ *   );
+ * }
+ *
+ */
+
 // 사용자 역할 타입 정의 (게스트, 사장님, 알바님)
 type UserRole = 'GUEST' | UserType.EMPLOYER | UserType.EMPLOYEE;
 
@@ -69,18 +85,6 @@ const Header = () => {
   const userRole = getUserRole();
 
   /**
-   * 사용자 역할에 따른 텍스트 버튼 스타일 클래스 반환
-   * - GUEST: 더 넓은 간격 (gap-10)
-   * - 인증 사용자: 반응형 간격 (gap-3 → gap-10)
-   */
-  const getTextButtonClass = () => {
-    console.log(userRole);
-    return userRole === 'GUEST'
-      ? `${TEXT_BUTTON_STYLE} sm:gap-10`
-      : `${TEXT_BUTTON_STYLE} sm:gap-3 lg:gap-10`;
-  };
-
-  /**
    * 로그아웃 처리 함수
    * - 인증 정보 초기화
    * - 홈 페이지로 리다이렉트
@@ -100,7 +104,7 @@ const Header = () => {
     // Link 컴포넌트 렌더링 (href 속성이 있는 경우)
     if ('href' in item) {
       return (
-        <Link key={index} href={item.href} className={getTextButtonClass()}>
+        <Link key={index} href={item.href} className={`${TEXT_BUTTON_STYLE}`}>
           {item.label}
         </Link>
       );
@@ -130,7 +134,7 @@ const Header = () => {
       <button
         key={index}
         onClick={handleLogout}
-        className={getTextButtonClass()}>
+        className={`${TEXT_BUTTON_STYLE}`}>
         {item.label}
       </button>
     );
@@ -159,7 +163,9 @@ const Header = () => {
         </Link>
 
         {/* 검색 입력 영역 */}
-        <search className="bg-gray-10 col-span-2 col-start-1 row-start-2 mx-auto w-full max-w-[450px] rounded-[10px] sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:mx-auto">
+        <form
+          role="search"
+          className="bg-gray-10 col-span-2 col-start-1 row-start-2 mx-auto w-full max-w-[450px] rounded-[10px] sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:mx-auto">
           <div className="flex w-full items-center gap-2 p-2 sm:items-start sm:gap-2.5 sm:p-2.5">
             <Image
               src="/images/search.svg"
@@ -171,13 +177,14 @@ const Header = () => {
             <input
               type="search"
               placeholder="가게 이름으로 찾아보세요"
-              className="color-gray-40 h-5 w-[233px] text-xs leading-4 font-normal focus:border-none focus:outline-none sm:text-sm sm:leading-[22px]"
+              className="text-gray-40 h-5 w-[233px] text-xs leading-4 font-normal focus:border-none focus:outline-none sm:text-sm sm:leading-[22px]"
             />
           </div>
-        </search>
+        </form>
 
         {/* 우측 네비게이션 버튼 영역 (로그인/로그아웃/알림 등) */}
-        <div className="col-start-2 row-start-1 ml-auto inline-flex w-fit items-center justify-end gap-4 sm:col-start-3 sm:ml-0 sm:justify-self-end">
+        <div
+          className={`col-start-2 row-start-1 ml-auto inline-flex w-fit items-center justify-end gap-4 sm:col-start-3 sm:ml-0 sm:justify-self-end ${userRole === 'GUEST' ? 'sm:gap-10' : 'sm:gap-3 lg:gap-10'}`}>
           {NAVIGATION[userRole].map(renderNavItem)}
         </div>
       </nav>

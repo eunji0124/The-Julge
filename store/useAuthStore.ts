@@ -35,6 +35,8 @@ export const useAuthStore = create<AuthState>()(
       // 로그아웃: 토큰과 사용자 정보 제거
       clearAuth() {
         set({ token: null, user: null, isAuthenticated: false });
+        // localStorage에서 완전히 제거
+        localStorage.removeItem('auth-token');
       },
     }),
     {

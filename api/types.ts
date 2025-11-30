@@ -40,6 +40,20 @@ export enum UserType {
 }
 
 /**
+ * 가게 정보
+ */
+export interface Shop {
+  id: string;
+  name: string;
+  category: string;
+  address1: string;
+  address2: string;
+  description: string;
+  imageUrl: string;
+  originalHourlyPay: number;
+}
+
+/**
  * 사용자 정보
  */
 export interface User {
@@ -50,6 +64,7 @@ export interface User {
   phone?: string;
   address?: string;
   bio?: string;
+  shop?: Shop;
 }
 
 /**
@@ -88,5 +103,31 @@ export interface LoginResponse {
       href: string;
     };
   };
+  links: ApiLink[];
+}
+
+/**
+ * 내 정보 조회 응답 타입
+ */
+export interface GetUserResponse {
+  item: User;
+  links: ApiLink[];
+}
+
+/**
+ * 내 정보 수정 요청 타입
+ */
+export interface UpdateUserRequest {
+  name?: string;
+  phone?: string;
+  address?: string;
+  bio?: string;
+}
+
+/**
+ * 내 정보 수정 응답 타입
+ */
+export interface UpdateUserResponse {
+  item: User;
   links: ApiLink[];
 }

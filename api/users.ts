@@ -1,5 +1,11 @@
 import { api } from './client';
-import { SignupRequest, SignupResponse } from './types';
+import {
+  SignupRequest,
+  SignupResponse,
+  GetUserResponse,
+  UpdateUserRequest,
+  UpdateUserResponse,
+} from './types';
 
 /**
  * 유저(Users) API
@@ -14,6 +20,30 @@ const users = {
    */
   signup: async (data: SignupRequest) => {
     const response = await api.post<SignupResponse>('/users', data);
+    return response;
+  },
+
+  /**
+   * 내 정보 조회
+   * @param userId - 사용자 ID
+   * @returns 사용자 정보
+   */
+  getUser: async (userId: string) => {
+    const response = await api.get<GetUserResponse>(`/users/${userId}`);
+    return response;
+  },
+
+  /**
+   * 내 정보 수정
+   * @param userId - 사용자 ID
+   * @param data - 수정할 정보 (name, phone, address, bio)
+   * @returns 수정된 사용자 정보
+   */
+  updateUser: async (userId: string, data: UpdateUserRequest) => {
+    const response = await api.put<UpdateUserResponse>(
+      `/users/${userId}`,
+      data
+    );
     return response;
   },
 };

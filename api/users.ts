@@ -1,5 +1,5 @@
 import { api } from './client';
-import { SignupRequest, SignupResponse } from './types';
+import { SignupRequest, SignupResponse, UserInfo } from './types';
 
 /**
  * 유저(Users) API
@@ -14,6 +14,11 @@ const users = {
    */
   signup: async (data: SignupRequest) => {
     const response = await api.post<SignupResponse>('/users', data);
+    return response;
+  },
+  // 내 정보 조회
+  getUser: async (user_id: string) => {
+    const response = await api.get<UserInfo>(`/users/${user_id}`);
     return response;
   },
 };

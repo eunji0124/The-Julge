@@ -136,7 +136,7 @@ const Register = () => {
         {/* Form */}
         <div className="my-6 grid w-full grid-cols-1 grid-rows-1 items-center justify-center gap-5 sm:my-8 sm:grid-cols-2 sm:grid-rows-[min-content_min-content_min-content] sm:gap-6 sm:gap-x-5 lg:grid-cols-3 lg:grid-rows-[min-content_min-content]">
           {/* 이름 */}
-          <div className={`${INPUT_BOX_STYLE}`}>
+          <div className={INPUT_BOX_STYLE}>
             <label htmlFor="name">이름*</label>
             <input
               type="text"
@@ -147,12 +147,12 @@ const Register = () => {
               onChange={handleChange}
               placeholder="입력"
               disabled={isLoading}
-              className={`${INPUT_STYLE}`}
+              className={INPUT_STYLE}
             />
           </div>
 
           {/* 연락처 */}
-          <div className={`${INPUT_BOX_STYLE}`}>
+          <div className={INPUT_BOX_STYLE}>
             <label htmlFor="phone">연락처*</label>
             <input
               type="tel"
@@ -163,7 +163,7 @@ const Register = () => {
               onChange={handleChange}
               placeholder="입력"
               disabled={isLoading}
-              className={`${INPUT_STYLE}`}
+              className={INPUT_STYLE}
             />
           </div>
 

@@ -31,7 +31,6 @@ const Post = ({
   className,
   onClick,
 }: StoreInfo) => {
-  const router = useRouter();
   const { workInfo, isColor, overlayText, getBadgeColor } = usePost({
     startAt,
     workTime,
@@ -39,7 +38,7 @@ const Post = ({
   });
 
   return (
-     <div
+    <div
       className={`${postClasses.container()} ${className || ''} cursor-pointer transition-colors duration-200 hover:scale-[1.02] hover:shadow-lg`}
       onClick={onClick} // 추가
       style={{ cursor: onClick ? 'pointer' : 'default' }}>

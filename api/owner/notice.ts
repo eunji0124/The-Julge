@@ -31,7 +31,7 @@ const noticesApi = {
 
   // 가게의 특정 공고 조회
   getShopNotice: async (shop_id: string, notice_id: string) => {
-    return api.post<ShopNoticeDetailResponse>(
+    return api.get<ShopNoticeDetailResponse>(
       `/shops/${shop_id}/notices/${notice_id}`
     );
   },

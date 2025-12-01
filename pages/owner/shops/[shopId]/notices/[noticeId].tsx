@@ -77,7 +77,7 @@ const NoticeDetail = () => {
           const applicationItems = applicationsRes.items.map(
             (item) => item.item
           );
-          console.log('applicationItems:', applicationItems); // 추가
+
           setApplicationList(applicationItems);
         }
       } catch (error) {

@@ -25,7 +25,7 @@ const noticesApi = {
   },
 
   // 가게 공고 등록
-  postShopNotice: async (shop_id: string, data: NoticeRequest) => {
+  postShopNotice: async (shop_id: string | undefined, data: NoticeRequest) => {
     return api.post<ShopNoticeResponse>(`/shops/${shop_id}/notices`, data);
   },
 

@@ -38,9 +38,8 @@ const Post = ({
 
   return (
     <div
-      className={postClasses.container({ className })}
-      onClick={onClick} // 추가
-      style={{ cursor: onClick ? 'pointer' : 'default' }}>
+      className={`${postClasses.container({ className })} ${onClick ? 'cursor-pointer' : 'cursor-default'}`}
+      onClick={onClick}>
       {/* 이미지 + 오버레이 */}
       <div className="h-[84px] overflow-hidden rounded-[12px] sm:h-[160px]">
         <PostImage

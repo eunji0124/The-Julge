@@ -32,7 +32,7 @@
 
 import Image from 'next/image';
 
-import BaseModal from './basemodal';
+import BaseModal from './BaseModal';
 
 interface ConfirmModalProps {
   isOpen: boolean;

@@ -22,6 +22,13 @@ export interface NoticeItem {
     item: ShopItem;
     href: string;
   };
+  currentUserApplication?: {
+    item: {
+      id: string;
+      status: 'pending' | 'accepted' | 'rejected' | 'canceled';
+    };
+    href: string;
+  } | null;
 }
 
 export interface NoticeListResponse {
@@ -36,6 +43,11 @@ export interface NoticeListResponse {
   }[];
 }
 
+export interface NoticeDetailResponse {
+  item: NoticeItem;
+  links: unknown[];
+}
+
 export interface FetchNoticeListParams {
   offset?: number;
   limit?: number;
@@ -43,6 +55,25 @@ export interface FetchNoticeListParams {
   keyword?: string;
   startsAtGte?: string;
   hourlyPayGte?: number;
+}
+
+// 공고 신청 응답 타입
+export interface ApplyNoticeResponse {
+  item: {
+    id: string;
+    status: 'pending' | 'accepted' | 'rejected' | 'canceled';
+    createdAt: string;
+  };
+  links: unknown[];
+}
+
+// 공고 신청 취소 응답 타입
+export interface CancelApplicationResponse {
+  item: {
+    id: string;
+    status: 'canceled';
+  };
+  links: unknown[];
 }
 
 // 공고 목록 조회
@@ -82,3 +113,39 @@ export async function fetchNoticeList(params: FetchNoticeListParams = {}) {
 
   return response;
 }
+
+// 공고 상세 조회
+export async function fetchNoticeDetail(
+  shopId: string,
+  noticeId: string
+): Promise<NoticeDetailResponse> {
+  const response = await api.get<NoticeDetailResponse>(
+    `/shops/${shopId}/notices/${noticeId}`
+  );
+
+  return response;
+}
+
+// 공고 신청 API
+export const applyNotice = async (
+  shopId: string,
+  noticeId: string
+): Promise<ApplyNoticeResponse> => {
+  const response = await api.post<ApplyNoticeResponse>(
+    `/shops/${shopId}/notices/${noticeId}/applications`
+  );
+  return response;
+};
+
+// 공고 신청 취소 API
+export const cancelApplication = async (
+  shopId: string,
+  noticeId: string,
+  applicationId: string
+): Promise<CancelApplicationResponse> => {
+  const response = await api.put<CancelApplicationResponse>(
+    `/shops/${shopId}/notices/${noticeId}/applications/${applicationId}`,
+    { status: 'canceled' }
+  );
+  return response;
+};

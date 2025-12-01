@@ -25,10 +25,10 @@ interface PostBannerUserProps {
   imageUrl: string;
   percentage?: number;
   description: string;
-  isActive?: boolean; // 공고 활성화 여부 (마감 여부)
-  applicationStatus?: ApplicationStatus; // 현재 사용자의 신청 상태
-  onApply?: () => void; // 신청하기 버튼 클릭
-  onCancel?: () => void; // 취소하기 버튼 클릭
+  isActive?: boolean;
+  applicationStatus?: ApplicationStatus;
+  onApply?: () => void;
+  onCancel?: () => void;
 }
 
 const PostBannerUser = ({
@@ -51,10 +51,12 @@ const PostBannerUser = ({
     isActive,
   });
 
+  // 시작 시간이 현재보다 이전이면 기간 만료
+  const isExpired = new Date(startAt) < new Date();
+
   // 버튼 상태 결정
   const getButtonConfig = () => {
-    // 공고가 마감된 경우 (closed)
-    if (!isActive) {
+    if (!isActive || isExpired) {
       return {
         text: '신청 불가',
         variant: 'primary' as const,
@@ -67,7 +69,7 @@ const PostBannerUser = ({
     switch (applicationStatus) {
       case 'pending':
       case 'approved':
-        // 신청 중이거나 승인된 경우 -> 취소하기
+        // 신청 중이거나 승인된 경우
         return {
           text: '취소하기',
           variant: 'secondary' as const,
@@ -78,7 +80,7 @@ const PostBannerUser = ({
       case 'rejected':
       case 'none':
       default:
-        // 신청하지 않았거나 취소/거절된 경우 -> 신청하기
+        // 신청하지 않았거나 취소/거절된 경우
         return {
           text: '신청하기',
           variant: 'primary' as const,

@@ -1,172 +1,75 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 
-import { isAxiosError } from 'axios';
-
-import { ApiErrorResponse } from '@/api/types';
-import users from '@/api/users';
 import Button from '@/components/common/Button';
 import Dropdown from '@/components/common/Dropdown';
 import ConfirmModal from '@/components/common/modal/ConfirmModal';
 import ErrorModal from '@/components/common/modal/ErrorModal';
 import { SEOUL_DISTRICTS } from '@/constants/locations';
-import { useAuthStore } from '@/store/useAuthStore';
+import { useAuthRedirect } from '@/hooks/useAuthRedirect';
+import { useProfileRegisterForm } from '@/hooks/useProfileRegisterForm';
 
-// Modal 메시지 상수
-const MODAL_MESSAGES = {
-  REQUIRED_NAME: '이름을 입력해주세요.',
-  REQUIRED_PHONE: '연락처를 입력해주세요.',
-  REQUIRED_LOGIN: '로그인이 필요합니다.',
-  SUCCESS: '등록이 완료되었습니다.',
-  ERROR_DEFAULT: '등록에 실패했습니다.',
-  ERROR_ADDRESS: '시군구 주소가 올바르지 않습니다.',
-  ERROR_FORBIDDEN: '권한이 없습니다',
-  ERROR_NOT_FOUND: '존재하지 않는 사용자입니다',
-  PROCESSING_ERROR: '프로필 등록 처리 중 오류가 발생했습니다.',
-};
-
-// Modal 상태 타입
-interface ModalState {
-  isOpen: boolean;
-  message: string;
-}
-
-// 입력 박스 공통 스타일
 const INPUT_BOX_STYLE =
   'flex w-full flex-col gap-2 text-base leading-relaxed font-normal';
 
-// 입력 공통 스타일
 const INPUT_STYLE =
   'border-gray-30 placeholder:text-gray-40 w-full rounded-md border px-5 py-4 focus:ring-2 focus:ring-red-50 focus:outline-none disabled:bg-gray-10 disabled:cursor-not-allowed';
 
 const Register = () => {
   const router = useRouter();
 
-  // form 상태 관리
-  const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    address: '',
-    bio: '',
-  });
-  // 초기 프로필 데이터 저장
-  const [initialData, setInitialData] = useState({
-    name: '',
-    phone: '',
-    address: '',
-    bio: '',
-  });
-  // 로딩 상태
-  const [isLoading, setIsLoading] = useState(false);
-  // 에러 Modal 상태
-  const [showErrorModal, setShowErrorModal] = useState<ModalState>({
-    isOpen: false,
-    message: '',
-  });
-  // 확인 Modal 상태
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  // Dropdown 표시 상태
+  // 인증 체크
+  const { isAuthenticated } = useAuthRedirect('/login');
+
+  // 프로필 form 로직
+  const { formData, isLoading, hasFormChanged, handleChange, handleSubmit } =
+    useProfileRegisterForm();
+
+  // Modal 상태
+  const [errorModal, setErrorModal] = useState({ isOpen: false, message: '' });
+  const [confirmModal, setConfirmModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+
+  // Dropdown 상태
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isReady, setIsReady] = useState(false);
-
-  // 로그인한 유저 정보
-  const user = useAuthStore((state) => state.user);
-  // 로그인 여부
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-
-  // 리다이렉트 추적용 ref
-  const hasRedirected = useRef(false);
-
-  // hydration 대기
-  useEffect(() => {
-    setIsReady(true);
-  }, []);
-
-  // 인증 확인: 준비가 완료된 후에만 리다이렉트
-  useEffect(() => {
-    if (isReady && !isAuthenticated && !hasRedirected.current) {
-      hasRedirected.current = true;
-      router.replace('/login');
-    }
-  }, [isReady, isAuthenticated, router]);
-
-  // 유저 프로필 가져오기
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (user?.id) {
-        try {
-          const response = await users.getUser(user.id);
-          const userData = response.item;
-
-          const profileData = {
-            name: userData.name || '',
-            phone: userData.phone || '',
-            address: userData.address || '',
-            bio: userData.bio || '',
-          };
-
-          // 기존 데이터가 있으면 form에 채우기
-          setFormData(profileData);
-          // 초기 데이터 저장
-          setInitialData(profileData);
-        } catch (error) {
-          console.error('사용자 정보 조회 실패:', error);
-        }
-      }
-    };
-
-    fetchUserData();
-  }, [user?.id]);
 
   // Modal 표시
-  const openModal = (message: string) => {
-    setShowErrorModal({ isOpen: true, message });
+  const openErrorModal = (message: string) => {
+    setErrorModal({ isOpen: true, message });
   };
 
-  // 일반 Modal 닫기
+  const openSuccessModal = (message: string) => {
+    setSuccessMessage(message);
+    setErrorModal({ isOpen: true, message });
+  };
+
   const closeModal = () => {
-    setShowErrorModal({ isOpen: false, message: '' });
+    setErrorModal({ isOpen: false, message: '' });
   };
 
-  // 성공 Modal 닫기 (페이지 이동 포함)
   const closeSuccessModal = () => {
-    setShowErrorModal({ isOpen: false, message: '' });
+    setErrorModal({ isOpen: false, message: '' });
+    setSuccessMessage('');
     router.push('/staff/profile');
   };
 
-  // form 변경 여부 확인
-  const hasFormChanged = () => {
-    return (
-      formData.name !== initialData.name ||
-      formData.phone !== initialData.phone ||
-      formData.address !== initialData.address ||
-      formData.bio !== initialData.bio
-    );
-  };
-
-  // X 버튼 클릭 처리
+  // form 닫기 핸들러
   const handleClose = () => {
-    if (hasFormChanged()) {
-      setShowConfirmModal(true);
+    if (hasFormChanged) {
+      setConfirmModal(true);
     } else {
       router.push('/staff/profile');
     }
   };
 
-  // 확인 Modal에서 "예" 선택
   const confirmLeave = () => {
-    setShowConfirmModal(false);
+    setConfirmModal(false);
     router.push('/staff/profile');
   };
 
-  // 확인 Modal에서 "아니오" 선택
-  const cancelLeave = () => {
-    setShowConfirmModal(false);
-  };
-
-  // Dropdown 버튼 클릭 처리
+  // 드롭다운 핸들러
   const handleDropdownToggle = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     if (!isLoading) {
@@ -174,95 +77,26 @@ const Register = () => {
     }
   };
 
-  // Dropdown 닫기
-  const handleDropdownClose = useCallback(() => {
-    setIsDropdownOpen(false);
-  }, []);
-
-  // 지역 선택 처리
   const handleAddressSelect = (value: string) => {
     if (!isLoading) {
-      setFormData((prev) => ({ ...prev, address: value }));
+      handleChange({
+        target: { name: 'address', value },
+      } as React.ChangeEvent<HTMLInputElement>);
       setIsDropdownOpen(false);
     }
   };
 
-  // 입력 필드 변경 처리
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    if (!isLoading) {
-      setFormData({
-        ...formData,
-        [e.target.name]: e.target.value,
-      });
-    }
+  // form 제출
+  const onSubmit = () => {
+    handleSubmit(openSuccessModal, openErrorModal);
   };
 
-  // 내 프로필 등록 처리
-  const handleSubmit = async () => {
-    // 필수 입력 항목 검증
-    if (!formData.name.trim()) {
-      openModal(MODAL_MESSAGES.REQUIRED_NAME);
-      return;
-    }
-    if (!formData.phone.trim()) {
-      openModal(MODAL_MESSAGES.REQUIRED_PHONE);
-      return;
-    }
-
-    // 사용자 인증 확인
-    if (!user?.id) {
-      openModal(MODAL_MESSAGES.REQUIRED_LOGIN);
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      await users.updateUser(user.id, {
-        name: formData.name,
-        phone: formData.phone,
-        address: formData.address,
-        bio: formData.bio || '',
-      });
-
-      openModal(MODAL_MESSAGES.SUCCESS);
-    } catch (error) {
-      let errorMessage = MODAL_MESSAGES.ERROR_DEFAULT;
-
-      // API 에러 상태 코드에 따른 메시지 처리
-      if (isAxiosError<ApiErrorResponse>(error) && error.response) {
-        const status = error.response?.status;
-
-        if (status === 403) {
-          errorMessage = MODAL_MESSAGES.ERROR_FORBIDDEN;
-        } else if (status === 404) {
-          errorMessage = MODAL_MESSAGES.ERROR_NOT_FOUND;
-        } else if (error.response?.data?.message) {
-          if (
-            error.response.data.message.includes(MODAL_MESSAGES.ERROR_ADDRESS)
-          ) {
-            errorMessage = MODAL_MESSAGES.ERROR_ADDRESS;
-          } else {
-            errorMessage = error.response.data.message;
-          }
-        }
-      } else {
-        // Axios 에러가 아니거나, 응답이 없는 예상치 못한 에러는 별도 처리
-        errorMessage = MODAL_MESSAGES.PROCESSING_ERROR;
-      }
-
-      openModal(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // 인증되지 않은 경우 렌더링 방지
   if (!isAuthenticated) {
     return null;
   }
+
+  const isSuccessModal =
+    errorModal.message === successMessage && successMessage !== '';
 
   return (
     <div className="bg-gray-05 max-h-max min-h-[calc(100vh-231px)] px-3 pt-10 pb-20 sm:min-h-[calc(100vh-170px)] sm:px-8 sm:py-15">
@@ -338,7 +172,6 @@ const Register = () => {
                   width={16}
                   height={16}
                   alt="선호 지역 드롭다운 열기"
-                  className=""
                 />
               ) : (
                 <Image
@@ -346,7 +179,6 @@ const Register = () => {
                   width={16}
                   height={16}
                   alt="선호 지역 드롭다운 닫기"
-                  className=""
                 />
               )}
             </button>
@@ -356,7 +188,7 @@ const Register = () => {
                 items={[...SEOUL_DISTRICTS]}
                 selected={formData.address}
                 onSelect={handleAddressSelect}
-                onClose={handleDropdownClose}
+                onClose={() => setIsDropdownOpen(false)}
               />
             )}
           </div>
@@ -383,31 +215,27 @@ const Register = () => {
           <Button
             variant="primary"
             size="large"
-            onClick={handleSubmit}
-            disabled={isLoading || !hasFormChanged()}>
+            onClick={onSubmit}
+            disabled={isLoading || !hasFormChanged}>
             {isLoading ? '처리중...' : '등록하기'}
           </Button>
         </div>
       </div>
 
       {/* Modal */}
-      {showErrorModal.isOpen && (
+      {errorModal.isOpen && (
         <ErrorModal
-          message={showErrorModal.message}
-          onClose={
-            showErrorModal.message === MODAL_MESSAGES.SUCCESS
-              ? closeSuccessModal
-              : closeModal
-          }
+          message={errorModal.message}
+          onClose={isSuccessModal ? closeSuccessModal : closeModal}
         />
       )}
 
-      {/* 확인 모달 */}
+      {/* 확인 Modal */}
       <ConfirmModal
-        isOpen={showConfirmModal}
-        message="변경된 내용이 저장되지 않습니다.<br>페이지를 나가시겠습니까?"
+        isOpen={confirmModal}
+        message="변경된 내용이 저장되지 않습니다."
         onConfirm={confirmLeave}
-        onCancel={cancelLeave}
+        onCancel={() => setConfirmModal(false)}
       />
     </div>
   );

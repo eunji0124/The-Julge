@@ -9,7 +9,7 @@ import { ApiErrorResponse, LoginRequest } from '@/api/types';
 import { useAuthStore } from '@/store/useAuthStore';
 
 /**
- * 로그인 mutation 훅 (쿠키 방식)
+ * 로그인 mutation 훅 (토큰 기반)
  * - Next.js API Route를 통해 로그인
  * - 서버가 HttpOnly Cookie에 토큰 저장
  * - 클라이언트는 사용자 정보만 받음
@@ -28,9 +28,10 @@ const useLogin = () => {
     onSuccess: (data) => {
       const { token, user } = data.item;
 
-      // 토큰과 사용자 정보를 Zustand에 저장
+      // 토큰과 사용자 정보를 Zustand 전역 상태에 저장
       setAuth(token, user.item);
 
+      // 로그인 성공 후  페이지로 자동 이동
       router.push('/');
     },
 

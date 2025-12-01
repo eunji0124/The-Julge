@@ -15,6 +15,19 @@ interface AuthState {
 }
 
 /**
+ * persist 옵션 상수 - 키 이름 중복 방지
+ */
+const persistOptions = {
+  name: 'auth-token', // localStorage 키 이름
+  // token과 user만 persist
+  partialize: (state: AuthState) => ({
+    token: state.token,
+    user: state.user,
+    isAuthenticated: state.isAuthenticated,
+  }),
+};
+
+/**
  * 인증 상태 관리 스토어 (토큰 기반)
  * - token을 localStorage에 persist하여 새로고침 시에도 유지
  * - 사용자 정보도 함께 저장
@@ -35,16 +48,10 @@ export const useAuthStore = create<AuthState>()(
       // 로그아웃: 토큰과 사용자 정보 제거
       clearAuth() {
         set({ token: null, user: null, isAuthenticated: false });
+        // localStorage에서 완전히 제거 - persistOptions.name 사용
+        localStorage.removeItem(persistOptions.name);
       },
     }),
-    {
-      name: 'auth-token', // localStorage 키 이름
-      // token과 user만 persist
-      partialize: (state) => ({
-        token: state.token,
-        user: state.user,
-        isAuthenticated: state.isAuthenticated,
-      }),
-    }
+    persistOptions
   )
 );

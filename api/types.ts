@@ -96,6 +96,24 @@ export interface LoginResponse {
 }
 
 /**
+ * 내 정보 수정 요청 타입
+ */
+export interface UpdateUserRequest {
+  name?: string;
+  phone?: string;
+  address?: string;
+  bio?: string;
+}
+
+/**
+ * 내 정보 수정 응답 타입
+ */
+export interface UpdateUserResponse {
+  item: User;
+  links: ApiLink[];
+}
+
+/**
  * 가게
  */
 export interface ShopRequest {

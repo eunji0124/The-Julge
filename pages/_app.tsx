@@ -1,5 +1,5 @@
 import '@/styles/globals.css';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastContainer } from 'react-toastify';
 
 import Layout from '@/components/layout/Layout';
+import { useAuthStore } from '@/store/useAuthStore';
 
 // 레이아웃을 제외할 페이지 경로 정의 상수
 const EXCLUDED_PATHS = ['/login', '/signup'];
@@ -36,6 +37,11 @@ const App = ({ Component, pageProps }: AppProps) => {
         },
       })
   );
+
+  // Zustand persist hydration 즉시 실행
+  useEffect(() => {
+    useAuthStore.persist.rehydrate();
+  }, []);
 
   // 레이아웃을 제외할 페이지 경로
   const shouldShowLayout = !EXCLUDED_PATHS.includes(router.pathname);

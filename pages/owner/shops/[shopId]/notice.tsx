@@ -5,6 +5,7 @@ import noticesApi from '@/api/owner/notice';
 import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
 import BadgeClose from '@/components/icons/BadgeClose';
+import { toast } from 'react-toastify';
 
 const PostNotice = () => {
   const [hourlyPay, setHourlyPay] = useState('');
@@ -83,12 +84,10 @@ const PostNotice = () => {
       };
 
       const res = await noticesApi.postShopNotice(shopId, payload);
-      console.log('등록 성공:', res);
 
-      alert('공고가 등록되었습니다!');
+      toast.success('공고가 등록되었습니다!');
     } catch (e) {
-      console.error('등록 실패:', e);
-      alert('등록 중 오류가 발생했습니다.');
+      toast.error('등록 중 오류가 발생했습니다.');
     }
   };
 

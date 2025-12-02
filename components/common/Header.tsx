@@ -53,7 +53,7 @@ const NAVIGATION: Record<UserRole, NavItem[]> = {
     { label: '알림', isIcon: true },
   ],
   [UserType.EMPLOYEE]: [
-    { label: '내 프로필', href: '/' },
+    { label: '내 프로필', href: '/staff/profile' },
     { label: '로그아웃', action: 'logout' },
     { label: '알림', isIcon: true },
   ],

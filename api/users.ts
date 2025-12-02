@@ -1,5 +1,11 @@
 import { api } from './client';
-import { SignupRequest, SignupResponse, User } from './types';
+import {
+  SignupRequest,
+  SignupResponse,
+  User,
+  GetApplicationsQuery,
+  UserApplicationsResponse,
+} from './types';
 
 export interface UserResponse {
   item: User;
@@ -36,6 +42,25 @@ const users = {
    */
   checkProfileRegistered: (profile: User): boolean => {
     return !!(profile.name && profile.phone && profile.address);
+  },
+
+  /**
+   * 유저의 지원 목록 조회
+   * @param userId - 사용자 ID
+   * @param query - 쿼리 파라미터 (offset, limit)
+   * @returns 지원 목록
+   */
+  getApplications: async (userId: string, query?: GetApplicationsQuery) => {
+    const params = new URLSearchParams();
+    if (query?.offset !== undefined)
+      params.append('offset', String(query.offset));
+    if (query?.limit !== undefined) params.append('limit', String(query.limit));
+
+    const queryString = params.toString();
+    const url = `/users/${userId}/applications${queryString ? `?${queryString}` : ''}`;
+
+    const response = await api.get<UserApplicationsResponse>(url);
+    return response;
   },
 };
 

@@ -198,9 +198,14 @@ export interface NoticeResponse {
   address: string[];
   keyword?: string;
   items: {
-    item: { id: string } & NoticeRequest & {
-        shop: { item: ShopRequest; href: string };
-      };
+    item: { id: string } & {
+      hourlyPay: number;
+      startsAt: string; // 양식: 2023-12-23T00:00:00Z
+      workhour: number;
+      description: string;
+    } & {
+      shop: { item: ShopRequest; href: string };
+    };
     links?: ApiLink[];
   }[];
   links?: ApiLink[];
@@ -219,7 +224,12 @@ export interface ShopNoticesResponse {
   count: number; // 전체 개수
   hasNext: boolean; // 다음 내용 존재 여부
   items: {
-    item: { id: string } & NoticeRequest & { closed: boolean };
+    item: { id: string } & {
+      hourlyPay: number;
+      startsAt: string; // 양식: 2023-12-23T00:00:00Z
+      workhour: number;
+      description: string;
+    } & { closed: boolean };
     links: ApiLink[];
   }[];
   links: ApiLink[];

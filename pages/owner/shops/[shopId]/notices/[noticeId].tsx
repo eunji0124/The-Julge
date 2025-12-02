@@ -9,6 +9,7 @@ import { ApplicationItem, NoticeRequest, ShopRequest } from '@/api/types';
 import Table from '@/components/common/Table';
 import PostBanner from '@/components/owner/PostBanner';
 import { transformApplicationData } from '@/lib/utils/transformTableData';
+import { calculatePercentage } from '@/utils/transformNotice';
 
 const NoticeDetail = () => {
   const router = useRouter();
@@ -177,6 +178,10 @@ const NoticeDetail = () => {
                 startAt={notice.startsAt}
                 workTime={notice.workhour}
                 wage={notice.hourlyPay}
+                percentage={calculatePercentage(
+                  notice.hourlyPay,
+                  shop.originalHourlyPay
+                )}
               />
             </div>
 

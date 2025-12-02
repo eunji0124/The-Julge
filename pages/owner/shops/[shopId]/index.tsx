@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { useRouter } from 'next/router';
+
 import noticesApi from '@/api/owner/notice';
 import shops from '@/api/owner/shop';
 import { ShopRequest, NoticeRequest } from '@/api/types';
@@ -8,6 +9,7 @@ import users from '@/api/users';
 import Button from '@/components/common/Button';
 import ShopBanner from '@/components/owner/ShopBanner';
 import Post from '@/components/post/Post';
+import { calculatePercentage } from '@/utils/transformNotice';
 
 const MyShop = () => {
   const [shop, setShop] = useState<({ id: string } & ShopRequest) | null>(null);
@@ -48,15 +50,6 @@ const MyShop = () => {
     checkAuth();
   }, [router]);
 
-  // useEffect(() => {
-  //   // 클라이언트에서만 실행
-  //   if (typeof window !== 'undefined' && !shopId) {
-  //     const pathname = window.location.pathname;
-  //     const extractedShopId = pathname.split('/')[3];
-  //     setShopId(extractedShopId);
-  //   }
-  // }, [shopId]);
-
   useEffect(() => {
     const fetchShopAndNotices = async () => {
       try {
@@ -87,6 +80,9 @@ const MyShop = () => {
         const noticeRes = await noticesApi.getShopNoticeList(shopId);
         const noticeItems = noticeRes.items.map((n) => n.item);
         setNotices(noticeItems);
+
+        // const originalHourlyPay = shopData.originalHourlyPay;
+        // const noticeHourlyPay = noticeItems[0]?.hourlyPay;
       } finally {
         setLoading(false);
       }
@@ -161,6 +157,10 @@ const MyShop = () => {
                       onClick={() => handlePostClick(shop.id, notice.id)}
                       imageUrl={shop.imageUrl}
                       isActive={!notice.closed}
+                      percentage={calculatePercentage(
+                        notice.hourlyPay,
+                        shop.originalHourlyPay
+                      )}
                     />
                   ))
                 ) : (

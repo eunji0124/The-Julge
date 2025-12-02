@@ -55,8 +55,15 @@ export const useRecentNotices = () => {
   const [recentNotices, setRecentNotices] = useState<RecentNotice[]>([]);
 
   useEffect(() => {
-    // 컴포넌트 마운트 시 로컬 스토리지에서 최근 본 공고 로드
     setRecentNotices(getRecentNotices());
+
+    // 로컬 스토리지 변경 감지 (다른 탭에서 변경 시)
+    const handleStorageChange = () => {
+      setRecentNotices(getRecentNotices());
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   return recentNotices;

@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 
 import { useRouter } from 'next/router';
 
 import {
-  fetchNoticeList,
   fetchNoticeDetail,
   applyNotice,
   cancelApplication,
@@ -27,9 +26,6 @@ const NoticeDetailPage = () => {
 
   // 인증 상태 확인
   const { isAuthenticated, user } = useAuthStore();
-
-  console.log('라우터 query:', router.query);
-  console.log('shopId:', shopId, 'noticeId:', noticeId);
 
   // 상세 데이터
   const [noticeDetail, setNoticeDetail] = useState<TransformedNotice | null>(
@@ -61,10 +57,9 @@ const NoticeDetailPage = () => {
   // 프로필 미등록 알림 모달
   const [isProfileAlertOpen, setIsProfileAlertOpen] = useState(false);
 
-  // 🔧 수정: fetchNoticeDetail API 사용
+  // 공고 상세 조회
   useEffect(() => {
     if (!shopId || !noticeId) {
-      console.log('shopId 또는 noticeId가 없습니다');
       return;
     }
     if (Array.isArray(shopId) || Array.isArray(noticeId)) return;
@@ -73,16 +68,10 @@ const NoticeDetailPage = () => {
       setIsLoading(true);
 
       try {
-        console.log('공고 상세 조회:', { shopId, noticeId });
-
-        // ✅ fetchNoticeDetail API 사용
         const detailResponse = await fetchNoticeDetail(
           String(shopId),
           String(noticeId)
         );
-
-        console.log('공고 상세 응답:', detailResponse);
-
         const transformed = transformNoticeData(detailResponse.item);
         setNoticeDetail(transformed);
         addRecentNotice(String(shopId), String(noticeId));
@@ -93,7 +82,6 @@ const NoticeDetailPage = () => {
           const status = application.status;
           setApplicationStatus(status === 'accepted' ? 'approved' : status);
           setCurrentApplicationId(application.id);
-          console.log('신청 정보:', { status, applicationId: application.id });
         } else {
           setApplicationStatus('none');
           setCurrentApplicationId(null);
@@ -110,37 +98,48 @@ const NoticeDetailPage = () => {
     fetchData();
   }, [shopId, noticeId]);
 
-  // 최근 본 공고 데이터
-  useEffect(() => {
-    console.log('recentNotices 배열:', recentNotices);
+  // 🔧 수정: 현재 공고를 제외한 최근 본 공고 목록을 메모이제이션
+  const filteredRecentNotices = useMemo(() => {
+    return recentNotices.filter((item) => item.id !== noticeId).slice(0, 6);
+  }, [recentNotices, noticeId]);
 
-    if (recentNotices.length === 0) {
-      console.log('최근 본 공고가 없습니다');
+  // 🔧 수정: Promise.allSettled를 사용하여 개별 공고 조회
+  useEffect(() => {
+    if (filteredRecentNotices.length === 0) {
       setRecentNoticesList([]);
       return;
     }
 
     const fetchRecentNotices = async () => {
       try {
-        const filteredRecent = recentNotices
-          .filter((item) => item.id !== noticeId)
-          .slice(0, 6);
+        // 각 공고를 개별적으로 조회 (Promise.allSettled 사용)
+        const results = await Promise.allSettled(
+          filteredRecentNotices.map(({ shopId: recentShopId, id: recentId }) =>
+            fetchNoticeDetail(recentShopId, recentId).then((res) =>
+              transformNoticeData(res.item)
+            )
+          )
+        );
 
-        const listResponse = await fetchNoticeList({
-          offset: 0,
-          limit: 100,
+        // 성공한 결과만 필터링
+        const successfulNotices = results
+          .filter(
+            (result): result is PromiseFulfilledResult<TransformedNotice> =>
+              result.status === 'fulfilled'
+          )
+          .map((result) => result.value);
+
+        // 실패한 요청 로깅
+        results.forEach((result, index) => {
+          if (result.status === 'rejected') {
+            console.warn(
+              `공고 로딩 실패 (shopId: ${filteredRecentNotices[index].shopId}, noticeId: ${filteredRecentNotices[index].id}):`,
+              result.reason
+            );
+          }
         });
 
-        const foundNotices = filteredRecent
-          .map((recentItem) => {
-            const found = listResponse.items.find(
-              ({ item }) => item.id === recentItem.id
-            );
-            return found ? transformNoticeData(found.item) : null;
-          })
-          .filter((item): item is TransformedNotice => item !== null);
-
-        setRecentNoticesList(foundNotices);
+        setRecentNoticesList(successfulNotices);
       } catch (error) {
         console.error('최근 본 공고 로딩 실패:', error);
         setRecentNoticesList([]);
@@ -148,7 +147,7 @@ const NoticeDetailPage = () => {
     };
 
     fetchRecentNotices();
-  }, [recentNotices, noticeId]);
+  }, [filteredRecentNotices]);
 
   // 신청 버튼
   const handleApply = async () => {
@@ -159,7 +158,7 @@ const NoticeDetailPage = () => {
       return;
     }
 
-    // 🔧 추가: 프로필 등록 여부 체크
+    // 프로필 등록 여부 체크
     if (!user?.id) {
       alert('사용자 정보를 찾을 수 없습니다.');
       return;
@@ -181,18 +180,15 @@ const NoticeDetailPage = () => {
       // 프로필이 등록된 경우 신청 진행
       if (!shopId || !noticeId) return;
 
-      // API 응답에서 applicationId 받아서 저장
+      // applicationId 확인
       const response = await applyNotice(String(shopId), String(noticeId));
       setApplicationStatus('pending');
 
-      // API 응답에 applicationId가 있다면 저장
       if (response?.item?.id) {
         setCurrentApplicationId(response.item.id);
-        console.log('신청 완료, applicationId:', response.item.id);
       }
 
       alert('신청이 완료되었습니다!');
-      console.log('신청 성공!');
     } catch (err: any) {
       console.error('신청 실패:', err);
 
@@ -227,7 +223,6 @@ const NoticeDetailPage = () => {
     }
 
     try {
-      console.log('취소 요청:', { shopId, noticeId, currentApplicationId });
       await cancelApplication(
         String(shopId),
         String(noticeId),
@@ -351,6 +346,7 @@ const NoticeDetailPage = () => {
                     imageUrl={notice.imageUrl}
                     isActive={notice.isActive}
                     percentage={notice.percentage}
+                    className="max-w-none"
                   />
                 </div>
               ))}

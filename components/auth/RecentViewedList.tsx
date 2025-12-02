@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { fetchNoticeList } from '@/api/notices';
+import { fetchNoticeDetail } from '@/api/notices';
 import { useRecentNotices } from '@/hooks/useRecentNotices';
 import {
   transformNoticeData,
@@ -15,32 +15,45 @@ interface Props {
 }
 
 const RecentViewedList = ({ className }: Props) => {
-  const recentNotices = useRecentNotices();
+  const recentNotices = useRecentNotices(); // 최대 6개까지 관리
   const [recentList, setRecentList] = useState<TransformedNotice[]>([]);
 
   useEffect(() => {
-    if (recentNotices.length === 0) {
+    if (!recentNotices.length) {
       setRecentList([]);
       return;
     }
 
     const fetchRecent = async () => {
       try {
-        const listResponse = await fetchNoticeList({
-          offset: 0,
-          limit: 100,
+        // Promise.allSettled를 사용하여 개별 실패 처리
+        const results = await Promise.allSettled(
+          recentNotices.map(({ shopId, id }) =>
+            fetchNoticeDetail(shopId, id).then((res) =>
+              transformNoticeData(res.item)
+            )
+          )
+        );
+
+        // 성공한 결과만 필터링
+        const successfulNotices = results
+          .filter(
+            (result): result is PromiseFulfilledResult<TransformedNotice> =>
+              result.status === 'fulfilled'
+          )
+          .map((result) => result.value);
+
+        // 실패한 요청 로깅 (디버깅용)
+        results.forEach((result, index) => {
+          if (result.status === 'rejected') {
+            console.warn(
+              `공고 로딩 실패 (shopId: ${recentNotices[index].shopId}, noticeId: ${recentNotices[index].id}):`,
+              result.reason
+            );
+          }
         });
 
-        const foundNotices = recentNotices
-          .map((recentItem) => {
-            const found = listResponse.items.find(
-              ({ item }) => item.id === recentItem.id
-            );
-            return found ? transformNoticeData(found.item) : null;
-          })
-          .filter((item): item is TransformedNotice => item !== null);
-
-        setRecentList(foundNotices);
+        setRecentList(successfulNotices);
       } catch (error) {
         console.error('최근 본 공고 로딩 실패:', error);
         setRecentList([]);

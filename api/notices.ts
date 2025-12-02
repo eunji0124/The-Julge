@@ -55,6 +55,9 @@ export interface FetchNoticeListParams {
   keyword?: string;
   startsAtGte?: string;
   hourlyPayGte?: number;
+  // 백엔드 정렬 파라미터 추가
+  sort?: 'time' | 'pay' | 'hour' | 'shop';
+  order?: 'asc' | 'desc';
 }
 
 // 공고 신청 응답 타입
@@ -85,6 +88,8 @@ export async function fetchNoticeList(params: FetchNoticeListParams = {}) {
     keyword,
     startsAtGte,
     hourlyPayGte,
+    sort,
+    order,
   } = params;
 
   const queryParams = new URLSearchParams();
@@ -105,6 +110,15 @@ export async function fetchNoticeList(params: FetchNoticeListParams = {}) {
 
   if (hourlyPayGte != null) {
     queryParams.append('hourlyPayGte', hourlyPayGte.toString());
+  }
+
+  // 백엔드 정렬 파라미터 추가
+  if (sort) {
+    queryParams.append('sort', sort);
+  }
+
+  if (order) {
+    queryParams.append('order', order);
   }
 
   const response = await api.get<NoticeListResponse>(

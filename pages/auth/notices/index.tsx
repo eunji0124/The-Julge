@@ -24,6 +24,24 @@ const SORT_OPTIONS: SortType[] = [
   '가나다순',
 ];
 
+// SortType을 백엔드 API 파라미터로 변환
+const getSortParams = (
+  sortType: SortType
+): { sort: string; order: 'asc' | 'desc' } => {
+  switch (sortType) {
+    case '마감임박순':
+      return { sort: 'time', order: 'asc' };
+    case '시급많은순':
+      return { sort: 'pay', order: 'desc' };
+    case '시간적은순':
+      return { sort: 'hour', order: 'asc' };
+    case '가나다순':
+      return { sort: 'shop', order: 'asc' };
+    default:
+      return { sort: 'time', order: 'asc' };
+  }
+};
+
 const NoticeListPage = () => {
   const router = useRouter();
   const { search: rawSearch } = router.query;
@@ -75,41 +93,19 @@ const NoticeListPage = () => {
     return rawSearch;
   }, [rawSearch]);
 
-  // 클라이언트 정렬 함수
-  const sortNotices = useCallback(
-    (notices: TransformedNotice[], targetSort: SortType) => {
-      const sorted = [...notices];
-      switch (targetSort) {
-        case '마감임박순':
-          return sorted.sort(
-            (a, b) =>
-              new Date(a.startAt).getTime() - new Date(b.startAt).getTime()
-          );
-        case '시급많은순':
-          return sorted.sort((a, b) => b.wage - a.wage);
-        case '시간적은순':
-          return sorted.sort((a, b) => a.workTime - b.workTime);
-        case '가나다순':
-          return sorted.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
-        default:
-          return sorted;
-      }
-    },
-    []
-  );
-
   // 맞춤 공고 불러오기 (시급 높은 순 3개)
   const loadCustomNotices = useCallback(async () => {
     try {
       const data = await fetchNoticeList({
         offset: 0,
-        limit: 20,
+        limit: 3,
+        sort: 'pay',
+        order: 'desc',
       });
 
-      const transformed = data.items
-        .map(({ item }) => transformNoticeData(item))
-        .sort((a, b) => b.wage - a.wage)
-        .slice(0, 3);
+      const transformed = data.items.map(({ item }) =>
+        transformNoticeData(item)
+      );
 
       setCustomNotices(transformed);
     } catch (error) {
@@ -126,10 +122,13 @@ const NoticeListPage = () => {
   const loadAllNotices = useCallback(async () => {
     setIsLoading(true);
     try {
-      // API 파라미터 구성
+      // 백엔드 정렬 파라미터 추가
+      const sortParams = getSortParams(sortType);
+
       const baseParams: FetchNoticeListParams = {
         offset: (allPage - 1) * ITEMS_PER_PAGE,
         limit: ITEMS_PER_PAGE,
+        ...sortParams, // 백엔드 정렬 파라미터
       };
 
       const filterParams = buildFilterParams(filterValues);
@@ -141,10 +140,8 @@ const NoticeListPage = () => {
         transformNoticeData(item)
       );
 
-      // 클라이언트에서 정렬
-      const sorted = sortNotices(transformed, sortType);
-
-      setAllNotices(sorted);
+      // 백엔드에서 이미 정렬된 데이터이므로 클라이언트 정렬 불필요
+      setAllNotices(transformed);
       setTotalAllCount(data.count);
     } catch (error) {
       console.error('공고 목록 로딩 실패:', error);
@@ -153,7 +150,7 @@ const NoticeListPage = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [allPage, filterValues, sortType, sortNotices, buildFilterParams]);
+  }, [allPage, filterValues, sortType, buildFilterParams]);
 
   // 검색 결과 불러오기
   const loadSearchResults = useCallback(async () => {
@@ -164,10 +161,14 @@ const NoticeListPage = () => {
 
     setIsLoading(true);
     try {
+      // 백엔드 정렬 파라미터 추가
+      const sortParams = getSortParams(sortType);
+
       const baseParams: FetchNoticeListParams = {
         offset: (searchPage - 1) * ITEMS_PER_PAGE,
         limit: ITEMS_PER_PAGE,
         keyword: searchTerm,
+        ...sortParams, // 백엔드 정렬 파라미터
       };
 
       const filterParams = buildFilterParams(filterValues);
@@ -179,10 +180,8 @@ const NoticeListPage = () => {
         transformNoticeData(item)
       );
 
-      // 클라이언트에서 정렬
-      const sorted = sortNotices(transformed, sortType);
-
-      setSearchResults(sorted);
+      // 백엔드에서 이미 정렬된 데이터이므로 클라이언트 정렬 불필요
+      setSearchResults(transformed);
       setTotalSearchCount(data.count);
     } catch (error) {
       console.error('검색 결과 로딩 실패:', error);
@@ -191,14 +190,7 @@ const NoticeListPage = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [
-    searchTerm,
-    searchPage,
-    filterValues,
-    sortType,
-    sortNotices,
-    buildFilterParams,
-  ]);
+  }, [searchTerm, searchPage, filterValues, sortType, buildFilterParams]);
 
   // 필터 또는 정렬 변경 시 페이지 리셋
   useEffect(() => {

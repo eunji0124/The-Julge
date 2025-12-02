@@ -5,7 +5,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 import { UserType } from '@/api/types';
+import NotificationModal from '@/components/common/notification/NotificationModal';
 import { useIsEmployer, useIsEmployee } from '@/hooks/useCheckUserType';
+import { useNotifications } from '@/hooks/useNotifications';
 import { useAuthStore } from '@/store/useAuthStore';
 
 /**
@@ -73,6 +75,16 @@ const Header = () => {
   const isEmployer = useIsEmployer();
   const isEmployee = useIsEmployee();
 
+  // 알림 훅 사용
+  const {
+    isNotificationOpen,
+    notifications,
+    hasUnreadNotifications,
+    toggleNotification,
+    closeNotification,
+    markAsRead,
+  } = useNotifications();
+
   /**
    * 현재 사용자의 역할을 판별하는 함수
    * @returns {UserRole} 사용자 역할 (GUEST, EMPLOYER, EMPLOYEE)
@@ -133,19 +145,32 @@ const Header = () => {
     // 아이콘 버튼 렌더링 (알림 아이콘)
     if (item.isIcon) {
       return (
-        <button
-          key={item.label}
-          onClick={() => console.log('알림')}
-          className="inline-flex h-5 w-5 items-center justify-center sm:h-6 sm:w-6"
-          aria-label={item.label}>
-          <Image
-            src="/images/notification.svg"
-            alt="알림"
-            width={18}
-            height={18}
-            className="sm:h-5 sm:w-5"
-          />
-        </button>
+        <div key={item.label} className="relative">
+          <button
+            onClick={toggleNotification}
+            className="inline-flex h-5 w-5 items-center justify-center sm:h-6 sm:w-6"
+            aria-label={item.label}>
+            <Image
+              src={
+                hasUnreadNotifications
+                  ? '/images/notificationActive.svg'
+                  : '/images/notification.svg'
+              }
+              alt="알림"
+              width={18}
+              height={18}
+              className="sm:h-5 sm:w-5"
+            />
+          </button>
+          {isNotificationOpen && (
+            <NotificationModal
+              isOpen={isNotificationOpen}
+              onClose={closeNotification}
+              notifications={notifications}
+              onReadNotification={markAsRead}
+            />
+          )}
+        </div>
       );
     }
 

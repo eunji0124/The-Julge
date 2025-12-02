@@ -14,4 +14,7 @@ const shops = {
     return api.put<ShopResponse>(`/shops/${shop_id}`, data);
   },
 };
+
 export default shops;
+
+

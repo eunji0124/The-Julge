@@ -24,7 +24,15 @@ import { cn } from '@/lib/utils';
 };
  */
 
-type BadgeStatus = 'accepted' | 'rejected' | 'canceled';
+export type BadgeStatus = 'accepted' | 'rejected' | 'canceled' | '';
+
+// status별 한글 텍스트 매핑
+const STATUS_TEXT: Record<BadgeStatus, string> = {
+  accepted: '승인 완료',
+  rejected: '거절',
+  canceled: '취소',
+  '': '대기중',
+};
 
 // 공통 반응형 스타일
 const commonResponsiveStyles =
@@ -47,16 +55,18 @@ const badgeVariants = cva(
   }
 );
 
-// status를 variant로 매핑
+//  variant로 매핑
 const getVariantFromStatus = (
   statusToMap: BadgeStatus
-): 'secondary' | 'danger' => {
+): 'primary' | 'secondary' | 'danger' => {
   switch (statusToMap) {
     case 'accepted':
       return 'secondary';
     case 'rejected':
     case 'canceled':
       return 'danger';
+    case '':
+      return 'primary';
   }
 };
 
@@ -75,15 +85,18 @@ const Badge: React.FC<BadgeProps> = ({
   status,
   ...props
 }) => {
-  // status prop이 전달되면 자동으로 variant를 결정하고, 그렇지 않으면 명시적으로 전달된 variant를 사용
+  // status prop이 전달되면 자동으로 variant와 텍스트를 결정
   const finalVariant =
     status !== undefined ? getVariantFromStatus(status) : variant;
+
+  // status가 있으면 한글 텍스트 사용, 없으면 children 사용
+  const displayText = status !== undefined ? STATUS_TEXT[status] : children;
 
   return (
     <div
       className={cn(badgeVariants({ variant: finalVariant }), className)}
       {...props}>
-      <span>{children}</span>
+      <span>{displayText}</span>
       {onRemove && (
         <button
           type="button"

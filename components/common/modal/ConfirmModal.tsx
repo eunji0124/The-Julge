@@ -59,7 +59,9 @@ const ConfirmModal = ({
         />
 
         {/* 메시지 */}
-        <p className="text-[16px]">{message}</p>
+        <p className="text-[16px] whitespace-pre-line">
+          {message.replace(/<br\s*\/?>/gi, '\n')}
+        </p>
 
         {/* 버튼 그룹 */}
         <div className="flex gap-3">

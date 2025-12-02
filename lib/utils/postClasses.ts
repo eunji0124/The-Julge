@@ -67,7 +67,7 @@ export const postClasses = {
     }
   ),
   badge: cva(
-    'ml-2 hidden h-[36px] items-center gap-[6px] rounded-full px-3 text-[14px] font-[600] tracking-[0.05em] text-white sm:flex whitespace-nowrap',
+    'hidden h-[36px] items-center gap-[6px] rounded-full px-3 text-[14px] font-[600] tracking-[0.05em] text-white sm:flex whitespace-nowrap',
     {
       variants: {
         isActive: {

@@ -27,7 +27,7 @@ const SORT_OPTIONS: SortType[] = [
 // SortType을 백엔드 API 파라미터로 변환
 const getSortParams = (
   sortType: SortType
-): { sort: string; order: 'asc' | 'desc' } => {
+): { sort: 'time' | 'pay' | 'hour' | 'shop'; order: 'asc' | 'desc' } => {
   switch (sortType) {
     case '마감임박순':
       return { sort: 'time', order: 'asc' };

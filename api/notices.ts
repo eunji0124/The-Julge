@@ -1,4 +1,5 @@
 import { api } from './client';
+import { ApiLink } from './types';
 
 export interface ShopItem {
   id: string;
@@ -39,13 +40,13 @@ export interface NoticeListResponse {
   hasNext: boolean;
   items: {
     item: NoticeItem;
-    links: unknown[];
+    links: ApiLink[];
   }[];
 }
 
 export interface NoticeDetailResponse {
   item: NoticeItem;
-  links: unknown[];
+  links: ApiLink[];
 }
 
 export interface FetchNoticeListParams {
@@ -67,7 +68,7 @@ export interface ApplyNoticeResponse {
     status: 'pending' | 'accepted' | 'rejected' | 'canceled';
     createdAt: string;
   };
-  links: unknown[];
+  links: ApiLink[];
 }
 
 // 공고 신청 취소 응답 타입
@@ -76,7 +77,7 @@ export interface CancelApplicationResponse {
     id: string;
     status: 'canceled';
   };
-  links: unknown[];
+  links: ApiLink[];
 }
 
 // 공고 목록 조회

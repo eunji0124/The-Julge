@@ -189,7 +189,7 @@ const NoticeDetailPage = () => {
       }
 
       alert('신청이 완료되었습니다!');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('신청 실패:', err);
 
       // API 에러 처리

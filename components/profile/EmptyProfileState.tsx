@@ -7,7 +7,7 @@ import Button from '@/components/common/Button';
  *
  * import EmptyProfileState from '@/components/profile/EmptyProfileState';
  *
- * const Ex = () {
+ * const Ex = () => {
  *   return (
  *     <div>
  *      <EmptyProfileState

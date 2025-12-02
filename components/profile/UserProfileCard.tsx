@@ -64,7 +64,7 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({ profile }) => {
               src="/images/location.svg"
               width={16}
               height={16}
-              alt="연락처"
+              alt="선호 지역"
               className="sm:h-5 sm:w-5"
             />
             <span>선호 지역: {address}</span>

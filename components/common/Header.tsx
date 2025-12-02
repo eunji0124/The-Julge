@@ -60,6 +60,8 @@ const NAVIGATION: Record<UserRole, NavItem[]> = {
     { label: '내 프로필', href: '/staff/profile' },
     { label: '로그아웃', action: 'logout' },
     { label: '알림', isIcon: true },
+    { label: '가게 등록', href: '/owner/shop-register' },
+    { label: '가게 수정', href: '/owner/shop-edit' },
   ],
 };
 

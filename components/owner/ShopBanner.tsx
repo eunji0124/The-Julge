@@ -1,3 +1,6 @@
+
+
+import { useRouter } from 'next/router';
 import Tippy from '@tippyjs/react';
 import { postClasses } from '@/lib/utils/postClasses';
 import Button from '../common/Button';
@@ -34,6 +37,7 @@ const ShopBanner = ({
   onEditClick,
   onRegisterClick,
 }: ShopBannerProps) => {
+  const router = useRouter();
   return (
     <div className="mx-auto flex w-[964px] gap-6 rounded-[12px] bg-[var(--color-red-10)] p-6 max-[744px]:w-[680px] max-[744px]:flex-col max-[744px]:gap-4 max-[375px]:w-[351px] max-[375px]:gap-3 max-[375px]:p-5">
       {/* 이미지 영역 */}
@@ -94,8 +98,10 @@ const ShopBanner = ({
           </Button>
           <Button
             size={undefined}
+
             onClick={onRegisterClick}
             className="h-full max-w-none flex-1">
+
             공고 등록하기
           </Button>
         </div>

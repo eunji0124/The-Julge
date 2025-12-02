@@ -1,3 +1,4 @@
+"use client";
 {
   /* <ShopBanner
 cartegory={'카페'}
@@ -12,8 +13,9 @@ description={
 /> */
 }
 
-import Tippy from '@tippyjs/react';
 
+import Tippy from '@tippyjs/react';
+import { useRouter } from "next/router";
 import { usePost } from '@/hooks/post/usePost';
 
 import Button from '../common/Button';
@@ -33,6 +35,7 @@ interface PostBannerProps {
   percentage?: number;
   description: string;
 }
+const router = useRouter();
 
 const PostBanner = ({
   name,
@@ -101,9 +104,12 @@ const PostBanner = ({
 
         {/* 버튼 영역: 항상 아래 */}
         <div className="flex h-[48px] w-full max-[744px]:mt-[40px] max-[744px]:h-[48px] max-[375px]:mt-[24px] max-[375px]:h-[38px]">
-          <Button variant="secondary" className="h-full max-w-none flex-1">
-            공고 편집하기
-          </Button>
+          <Button
+  variant="secondary"
+  onClick={() => router.push("/owner/shop-edit")}
+>
+  공고 편집하기
+</Button>
         </div>
       </div>
     </div>

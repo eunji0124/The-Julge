@@ -41,18 +41,24 @@ const apiClient = axios.create({
  */
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Zustand에서 토큰 가져오기
-    // 인터셉터 내부에서 동적으로 가져와야 최신 토큰이 반영됨
     if (typeof window !== 'undefined') {
       const authStorage = localStorage.getItem('auth-token');
+
       if (authStorage) {
         try {
-          const { state } = JSON.parse(authStorage);
-          const token = state?.token;
+          /**
+           * 🔥 핵심 수정:
+           * auth-token → persist 구조(JSON)
+           * { state: { token: "JWT", ... }, version: 0 }
+           * 여기서 state.token만 정확하게 꺼낸다.
+           */
+          const parsed = JSON.parse(authStorage);
+          const token = parsed?.state?.token;
 
-          if (token) {
+          if (typeof token === 'string' && token.length > 0) {
             config.headers.Authorization = `Bearer ${token}`;
           }
+
         } catch (error) {
           console.error('토큰 파싱 에러:', error);
         }
@@ -80,19 +86,13 @@ apiClient.interceptors.response.use(
     if (error.code === 'ECONNABORTED') {
       errorMessage = '요청 시간이 초과되었습니다. 다시 시도해 주세요.';
     } else if (error.request && !error.response) {
-      // 네트워크 오류 (요청은 보냈으나 응답을 받지 못함)
-      errorMessage =
-        '네트워크 오류가 발생했습니다. 인터넷 연결을 확인해 주세요.';
+      errorMessage = '네트워크 오류가 발생했습니다. 인터넷 연결을 확인해 주세요.';
     } else if (error.response?.status && error.response.status >= 500) {
-      // 서버 에러 (500번대)
       errorMessage = '서버 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
     } else if (error.response?.status === 401) {
-      // 인증 에러
       toast.error('로그인이 필요합니다.');
 
-      // 401 에러 시 토큰 제거 및 로그인 페이지로 리디렉션
       if (typeof window !== 'undefined') {
-        // Zustand 스토어 초기화
         useAuthStore.getState().clearAuth();
 
         if (window.location.pathname !== '/login') {
@@ -102,10 +102,7 @@ apiClient.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // 에러 메시지가 있는 경우, toast 표시
-    if (errorMessage) {
-      toast.error(errorMessage);
-    }
+    if (errorMessage) toast.error(errorMessage);
 
     return Promise.reject(error);
   }
@@ -113,11 +110,6 @@ apiClient.interceptors.response.use(
 
 /**
  * 타입 안전 API 래퍼 함수
- * 응답 데이터에 대한 제네릭 타입을 지정하여 타입 안정성을 제공합니다.
- *
- * @example
- * const data = await api.get<UserResponse>('/users/1');
- * const result = await api.post<SignupResponse>('/users', data);
  */
 export const api = {
   get: <T = unknown>(

@@ -10,11 +10,11 @@ import {
   cancelApplication,
 } from '@/api/notices';
 import users from '@/api/users';
-import PostBannerUser from '@/components/auth/PostBanner';
 import Button from '@/components/common/Button';
 import AlertModal from '@/components/common/modal/AlertModal';
 import ConfirmModal from '@/components/common/modal/ConfirmModal';
 import Post from '@/components/post/Post';
+import PostBannerUser from '@/components/post/PostBannerUser';
 import { useRecentNotices, addRecentNotice } from '@/hooks/useRecentNotices';
 import { useAuthStore } from '@/store/useAuthStore';
 import {
@@ -255,7 +255,7 @@ const NoticeDetailPage = () => {
     clickedShopId: string,
     clickedNoticeId: string
   ) => {
-    router.push(`/auth/shops/${clickedShopId}/notices/${clickedNoticeId}`);
+    router.push(`/staff/shops/${clickedShopId}/notices/${clickedNoticeId}`);
   };
 
   if (isLoading) {
@@ -382,7 +382,7 @@ const NoticeDetailPage = () => {
           variant="primary"
           size="medium"
           className="!max-w-none px-4"
-          onClick={() => router.push(`/auth/notices`)}>
+          onClick={() => router.push(`/staff/notices`)}>
           공고목록
         </Button>
       </div>

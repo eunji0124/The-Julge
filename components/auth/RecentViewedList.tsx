@@ -72,7 +72,7 @@ const RecentViewedList = ({ className }: Props) => {
       <div className="grid grid-cols-3 gap-4">
         {recentList.map((notice) => (
           <Link
-            href={`/auth/shops/${notice.shopId}/notices/${notice.id}`}
+            href={`/staff/shops/${notice.shopId}/notices/${notice.id}`}
             key={notice.id}
             className="overflow-hidden rounded-xl bg-white shadow">
             <Image

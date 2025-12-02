@@ -2,11 +2,11 @@ import Tippy from '@tippyjs/react';
 
 import { usePost } from '@/hooks/post/usePost';
 
+import PostImage from './PostImage';
+import PostLocation from './PostLocation';
+import PostTime from './PostTime';
+import PostWage from './PostWage';
 import Button from '../common/Button';
-import PostImage from '../post/PostImage';
-import PostLocation from '../post/PostLocation';
-import PostTime from '../post/PostTime';
-import PostWage from '../post/PostWage';
 import 'tippy.js/dist/tippy.css';
 
 type ApplicationStatus =

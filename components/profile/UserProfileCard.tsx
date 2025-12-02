@@ -34,7 +34,7 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({ profile }) => {
   };
 
   return (
-    <div className="bg-red-10 flex h-fit w-full max-w-[665px] items-start justify-between rounded-xl p-5 sm:p-8">
+    <div className="bg-red-10 flex h-fit w-full items-start justify-between rounded-xl p-5 sm:p-8 lg:max-w-[665px]">
       {/* 프로필 영역 */}
       <div className="flex flex-col gap-5 sm:gap-7">
         <div className="flex flex-col gap-2 sm:gap-3">

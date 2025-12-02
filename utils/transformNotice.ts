@@ -34,7 +34,7 @@ export const transformNoticeData = (notice: NoticeItem): TransformedNotice => {
     name: notice.shop.item.name,
     startAt: notice.startsAt,
     workTime: notice.workhour,
-    location: `${notice.shop.item.address1}`,
+    location: `${notice.shop.item.address1} ${notice.shop.item.address2}`,
     wage: notice.hourlyPay,
     imageUrl: notice.shop.item.imageUrl,
     isActive: !notice.closed,

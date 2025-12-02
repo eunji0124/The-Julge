@@ -3,13 +3,14 @@ import {
   SignupRequest,
   SignupResponse,
   User,
+  ApiLink,
   GetApplicationsQuery,
   UserApplicationsResponse,
 } from './types';
 
 export interface UserResponse {
   item: User;
-  links: unknown[];
+  links: ApiLink[];
 }
 /**
  * 유저(Users) API

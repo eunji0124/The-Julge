@@ -2,6 +2,8 @@ import { useEffect, useState, useMemo } from 'react';
 
 import { useRouter } from 'next/router';
 
+import { isAxiosError } from 'axios';
+
 import {
   fetchNoticeDetail,
   applyNotice,
@@ -98,12 +100,12 @@ const NoticeDetailPage = () => {
     fetchData();
   }, [shopId, noticeId]);
 
-  // 🔧 수정: 현재 공고를 제외한 최근 본 공고 목록을 메모이제이션
+  // 현재 공고를 제외한 최근 본 공고 목록
   const filteredRecentNotices = useMemo(() => {
     return recentNotices.filter((item) => item.id !== noticeId).slice(0, 6);
   }, [recentNotices, noticeId]);
 
-  // 🔧 수정: Promise.allSettled를 사용하여 개별 공고 조회
+  // 개별 공고 조회
   useEffect(() => {
     if (filteredRecentNotices.length === 0) {
       setRecentNoticesList([]);
@@ -193,11 +195,15 @@ const NoticeDetailPage = () => {
       console.error('신청 실패:', err);
 
       // API 에러 처리
-      if (err?.response?.status === 401) {
-        alert('로그인이 필요합니다.');
-        router.push('/login');
-      } else if (err?.response?.status === 400) {
-        alert('이미 신청한 공고입니다.');
+      if (isAxiosError(err) && err.response) {
+        if (err.response.status === 401) {
+          alert('로그인이 필요합니다.');
+          router.push('/login');
+        } else if (err.response.status === 400) {
+          alert('이미 신청한 공고입니다.');
+        } else {
+          alert('신청에 실패했습니다. 다시 시도해주세요.');
+        }
       } else {
         alert('신청에 실패했습니다. 다시 시도해주세요.');
       }

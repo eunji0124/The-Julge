@@ -1,13 +1,13 @@
 import React from 'react';
 
 import Image from 'next/image';
-import { useRouter } from 'next/router';
 
 import Button from '@/components/common/Button';
 import { UserProfile } from '@/hooks/useUserProfile';
 
 interface UserProfileCardProps {
   profile: UserProfile;
+  onEdit?: () => void;
 }
 
 const PROFILE_INFO_BASE_STYLE =
@@ -18,9 +18,10 @@ const PROFILE_INFO_SUB_STYLE = `
   flex gap-1.5 text-gray-50 
 `;
 
-const UserProfileCard: React.FC<UserProfileCardProps> = ({ profile }) => {
-  const router = useRouter();
-
+const UserProfileCard: React.FC<UserProfileCardProps> = ({
+  profile,
+  onEdit,
+}) => {
   const { name, phone, address, bio } = profile;
 
   // bio의 줄바꿈 처리 함수
@@ -78,9 +79,7 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({ profile }) => {
       <Button
         variant="secondary"
         size="medium"
-        onClick={() => {
-          router.push('/staff/profile/register');
-        }}
+        onClick={onEdit}
         className="px-5 py-2.5 sm:h-12 sm:w-[169px] sm:max-w-[169px] sm:text-base sm:leading-5">
         편집하기
       </Button>

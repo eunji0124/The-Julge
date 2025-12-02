@@ -13,7 +13,7 @@ import Button from '@/components/common/Button';
  *      <EmptyProfileState
  *        message="내 프로필을 등록하고 원하는 가게에 지원해 보세요."
  *        buttonText="내 프로필 등록하기"
- *        link='/staff/profile/register'/>
+ *        onClick={() => console.log('')}/>
  *     </div>
  *   );
  * }
@@ -24,13 +24,15 @@ import Button from '@/components/common/Button';
 interface EmptyStateProps {
   message: string;
   buttonText?: string | undefined;
-  link?: string | undefined;
+  link?: string;
+  onClick?: () => void;
 }
 
 const EmptyProfileState: React.FC<EmptyStateProps> = ({
   message,
   buttonText,
   link,
+  onClick,
 }) => {
   const router = useRouter();
 
@@ -49,15 +51,24 @@ const EmptyProfileState: React.FC<EmptyStateProps> = ({
       </p>
 
       {/* 액션 버튼 */}
-      {buttonText && link && (
-        <Button
-          variant="primary"
-          size="large"
-          onClick={handleButtonClick}
-          className="px-5 py-2.5 text-sm sm:h-[47px] sm:w-[346px] sm:max-w-[346px] sm:text-base sm:leading-5">
-          {buttonText}
-        </Button>
-      )}
+      {buttonText &&
+        (onClick ? (
+          <Button
+            variant="primary"
+            size="large"
+            onClick={onClick}
+            className="px-5 py-2.5 text-sm sm:h-[47px] sm:w-[346px] sm:max-w-[346px] sm:text-base sm:leading-5">
+            {buttonText}
+          </Button>
+        ) : link ? (
+          <Button
+            variant="primary"
+            size="large"
+            onClick={handleButtonClick}
+            className="px-5 py-2.5 text-sm sm:h-[47px] sm:w-[346px] sm:max-w-[346px] sm:text-base sm:leading-5">
+            {buttonText}
+          </Button>
+        ) : null)}
     </div>
   );
 };

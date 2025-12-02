@@ -17,16 +17,6 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'example.com' },
     ],
   },
-
-  async redirects() {
-    return [
-      {
-        source: '/',
-        destination: '/notices',
-        permanent: false,
-      },
-    ];
-  },
 };
 
 export default nextConfig;

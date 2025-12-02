@@ -32,7 +32,7 @@ const useLogin = () => {
       setAuth(token, user.item);
 
       // 로그인 성공 후  페이지로 자동 이동
-      router.push('/notices');
+      router.push('/');
     },
 
     onError: (error) => {

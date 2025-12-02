@@ -16,7 +16,7 @@ const Custom404 = () => {
         <meta name="description" content="페이지를 찾을 수 없습니다" />
       </Head>
       <div className="flex max-h-max min-h-[calc(100vh-231px)] w-full flex-col items-center justify-center gap-4 sm:min-h-[calc(100vh-170px)] sm:gap-6">
-        <Link href="/notices">
+        <Link href="/">
           <Image
             src="/images/logo.svg"
             alt="The Julge 로고"

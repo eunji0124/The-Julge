@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 
-import Head from 'next/head';
 import { useRouter } from 'next/router';
 
 import axios from 'axios';
@@ -151,10 +150,6 @@ const PostNotice = () => {
 
   return (
     <>
-      <Head>
-        <title>공고 등록 | The-Julge</title>
-        <meta name="description" content="공고 등록 페이지" />
-      </Head>
       <div className="flex min-h-screen w-full flex-col items-center px-4 py-10 md:px-8 md:py-16">
         {/* 상단 제목 + 닫기 버튼 */}
         <div className="mb-8 flex w-full max-w-[964px] items-center justify-between">

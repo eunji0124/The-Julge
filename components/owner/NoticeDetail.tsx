@@ -1,7 +1,5 @@
-// pages/owner/notice/[noticeId].tsx
 import { useEffect, useState } from 'react';
 
-import Head from 'next/head';
 import { useRouter } from 'next/router';
 
 import axios from 'axios';
@@ -177,10 +175,6 @@ const NoticeDetail = () => {
 
   return (
     <>
-      <Head>
-        <title>공고 상세 | The-Julge</title>
-        <meta name="description" content="공고 상세 페이지" />
-      </Head>
       <div className="mx-auto max-w-[1440px] px-6 pt-6">
         <div className="mx-auto w-[964px] max-[744px]:w-[680px] max-[375px]:w-[351px]">
           {shop && (

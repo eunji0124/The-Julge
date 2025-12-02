@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 
-import Button from '../common/Button';
+import Button from '@/components/common/Button';
 
 /**
  * EmptyProfileState 사용 예제
@@ -42,7 +42,7 @@ const EmptyProfileState: React.FC<EmptyStateProps> = ({
 
   return (
     <div
-      className={`border-gray-20 flex w-full flex-col items-center justify-center rounded-xl border px-6 py-15 ${buttonText ? 'gap-4' : ''}`}>
+      className={`border-gray-20 flex w-full flex-col items-center justify-center rounded-xl border px-6 py-15 ${buttonText ? 'gap-4 sm:gap-6' : ''}`}>
       {/* 안내 메시지 */}
       <p className="text-sm leading-[22px] font-normal sm:text-base sm:leading-relaxed">
         {message}
@@ -54,7 +54,7 @@ const EmptyProfileState: React.FC<EmptyStateProps> = ({
           variant="primary"
           size="large"
           onClick={handleButtonClick}
-          className="max-w-fit px-5 py-2.5 text-sm sm:px-[136px] sm:py-3.5 sm:text-base sm:leading-5">
+          className="px-5 py-2.5 text-sm sm:h-[47px] sm:w-[346px] sm:max-w-[346px] sm:text-base sm:leading-5">
           {buttonText}
         </Button>
       )}

@@ -301,7 +301,7 @@ const NoticeListPage = () => {
                         className="max-w-none"
                         onClick={() => {
                           router.push(
-                            `/auth/shops/${notice.shopId}/notices/${notice.id}`
+                            `/staff/shops/${notice.shopId}/notices/${notice.id}`
                           );
                         }}
                       />
@@ -343,7 +343,7 @@ const NoticeListPage = () => {
                               className="max-w-none"
                               onClick={() => {
                                 router.push(
-                                  `/auth/shops/${notice.shopId}/notices/${notice.id}`
+                                  `/staff/shops/${notice.shopId}/notices/${notice.id}`
                                 );
                               }}
                             />
@@ -360,7 +360,7 @@ const NoticeListPage = () => {
                           className="max-w-none"
                           onClick={() => {
                             router.push(
-                              `/auth/shops/${notice.shopId}/notices/${notice.id}`
+                              `/staff/shops/${notice.shopId}/notices/${notice.id}`
                             );
                           }}
                         />
@@ -435,7 +435,7 @@ const NoticeListPage = () => {
                         className="max-w-none"
                         onClick={() => {
                           router.push(
-                            `/auth/shops/${notice.shopId}/notices/${notice.id}`
+                            `/staff/shops/${notice.shopId}/notices/${notice.id}`
                           );
                         }}
                       />

@@ -11,7 +11,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 export interface Notification {
   id: string;
   shopName: string;
-  status: string;
+  status: 'accepted' | 'rejected';
   time: string;
   read: boolean;
 }
@@ -92,8 +92,8 @@ export const useNotifications = (options: UseNotificationsOptions = {}) => {
    * 4. 상태 업데이트
    */
   const fetchNotifications = useCallback(async () => {
-    // 조건 체크: 기능 비활성화, 직원 아님, 사용자 ID 없음
-    if (!enabled || !isEmployee || !user?.id) return;
+    // 조건 체크: 기능 비활성화, 직원 아님, 사용자 ID 없음, 로딩 중
+    if (!enabled || !isEmployee || !user?.id || isLoading) return;
 
     setIsLoading(true);
     setError(null);
@@ -103,18 +103,24 @@ export const useNotifications = (options: UseNotificationsOptions = {}) => {
       const response = await alert.getAlerts(user.id);
 
       // API 응답 데이터를 UI에서 사용하는 형식으로 변환
-      const formattedNotifications = response.items.map((alertItem) => {
-        return {
-          id: alertItem.item.id,
-          shopName: alertItem.item.shop.item.name, // 가게 이름
-          status: alertItem.item.result, // 'accepted' | 'rejected'
-          time: getWorkTime(
-            alertItem.item.notice.item.startsAt,
-            alertItem.item.notice.item.workhour
-          ), // 예: 2023-01-14 15:00~18:00
-          read: alertItem.item.read, // 읽음 여부
-        };
-      });
+      // status가 'accepted' 또는 'rejected'인 항목만 필터링
+      const formattedNotifications = response.items
+        .filter((alertItem) => {
+          const status = alertItem.item.result;
+          return status === 'accepted' || status === 'rejected';
+        })
+        .map((alertItem) => {
+          return {
+            id: alertItem.item.id,
+            shopName: alertItem.item.shop.item.name, // 가게 이름
+            status: alertItem.item.result, // 'accepted' | 'rejected'
+            time: getWorkTime(
+              alertItem.item.notice.item.startsAt,
+              alertItem.item.notice.item.workhour
+            ), // 예: 2023-01-14 15:00~18:00
+            read: alertItem.item.read, // 읽음 여부
+          };
+        });
 
       setNotifications(formattedNotifications);
 
@@ -131,7 +137,7 @@ export const useNotifications = (options: UseNotificationsOptions = {}) => {
     } finally {
       setIsLoading(false);
     }
-  }, [enabled, isEmployee, user?.id]);
+  }, [enabled, isEmployee, user?.id, isLoading]);
 
   /**
    * 직원 사용자일 때 주기적으로 알림 데이터를 조회합니다.

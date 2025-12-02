@@ -22,7 +22,7 @@ const STATUS_CONFIG = {
 
 const NotificationItem = ({ notification, onRead }: NotificationItemProps) => {
   const { label, bgColor, textColor, borderColor } =
-    STATUS_CONFIG[notification.status as keyof typeof STATUS_CONFIG];
+    STATUS_CONFIG[notification.status];
 
   const { id, read, shopName, time } = notification;
 
@@ -42,14 +42,11 @@ const NotificationItem = ({ notification, onRead }: NotificationItemProps) => {
       {/* 메시지 */}
       <div className="text-sm leading-[22px] font-normal">
         {shopName}({time}) 공고 지원이{' '}
-        <span className={`${textColor}`}>{`${label}`}</span>
-        되었어요.
+        <span className={`${textColor}`}>{`${label}`}</span>되었어요.
       </div>
 
       {/* 시간 */}
-      <div className="text-gray-40 text-xs leading-4 font-normal">
-        {notification.time}
-      </div>
+      <div className="text-gray-40 text-xs leading-4 font-normal">{time}</div>
     </div>
   );
 };

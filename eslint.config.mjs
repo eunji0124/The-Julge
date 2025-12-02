@@ -6,6 +6,7 @@ import importPlugin from 'eslint-plugin-import';
 import typescriptEslint from '@typescript-eslint/eslint-plugin';
 import typescriptParser from '@typescript-eslint/parser';
 import prettierConfig from 'eslint-config-prettier';
+import globals from 'globals';
 
 export default [
   // Ignore patterns
@@ -27,6 +28,9 @@ export default [
         ecmaFeatures: { jsx: true },
       },
       globals: {
+        ...globals.browser,
+        ...globals.node,
+        ...globals.es2021,
         React: 'readonly',
         JSX: 'readonly',
         module: 'readonly',

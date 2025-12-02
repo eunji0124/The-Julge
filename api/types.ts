@@ -229,7 +229,6 @@ export interface ShopNoticesResponse {
 /**
  * 가게의 공고 등록
  */
-
 export interface ShopNoticeResponse {
   item: {
     id: string;
@@ -262,7 +261,6 @@ export interface ShopNoticeDetailResponse {
 /**
  * 가게의 특정 공고의 지원 목록 조회
  */
-
 export interface GetApplicationsQuery {
   offset?: number; // 조회 시작 기준
   limit?: number; // 조회 개수
@@ -289,7 +287,6 @@ export interface ApplicationItem {
 /**
  *  유저의 지원 목록
  */
-
 export interface ApplicationsResponse {
   offset: number;
   limit: number;
@@ -340,5 +337,62 @@ export interface UpdateApplicationRequest {
 
 export interface UpdateApplicationResponse {
   item: ApplicationItem;
+  links: ApiLink[];
+}
+
+/**
+ * 알림
+ */
+
+/**
+ * 알림 아이템
+ */
+export interface AlertItem {
+  id: string;
+  createdAt: string;
+  result: 'accepted' | 'rejected';
+  read: boolean;
+  application: {
+    item: {
+      id: string;
+      status: 'pending' | 'accepted' | 'rejected';
+    };
+    href: string;
+  };
+  shop: {
+    item: { id: string } & ShopRequest;
+    href: string;
+  };
+  notice: {
+    item: { id: string } & NoticeRequest & { closed: boolean };
+    href: string;
+  };
+}
+
+/**
+ * 알림 목록 조회 응답
+ */
+export interface AlertsResponse {
+  offset: number;
+  limit: number;
+  count: number; // 전체 개수
+  hasNext: boolean; // 다음 내용 존재 여부
+  items: {
+    item: AlertItem;
+    links: ApiLink[];
+  }[];
+  links: ApiLink[];
+}
+
+/**
+ * 알림 읽음 처리 응답
+ */
+export interface ReadAlertResponse {
+  offset: number;
+  limit: number;
+  items: {
+    item: AlertItem;
+    links: ApiLink[];
+  }[];
   links: ApiLink[];
 }

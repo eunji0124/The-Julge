@@ -1,43 +1,76 @@
+import { useEffect, useState } from 'react';
+
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { NoticeItem } from '@/api/notices';
-
-interface RecentItem {
-  item: NoticeItem;
-}
+import { fetchNoticeList } from '@/api/notices';
+import { useRecentNotices } from '@/hooks/useRecentNotices';
+import {
+  transformNoticeData,
+  TransformedNotice,
+} from '@/utils/transformNotice';
 
 interface Props {
   className?: string;
 }
 
 const RecentViewedList = ({ className }: Props) => {
-  const recent: RecentItem[] =
-    typeof window !== 'undefined'
-      ? JSON.parse(localStorage.getItem('recentNotices') || '[]')
-      : [];
+  const recentNotices = useRecentNotices();
+  const [recentList, setRecentList] = useState<TransformedNotice[]>([]);
 
-  if (!recent.length) return null;
+  useEffect(() => {
+    if (recentNotices.length === 0) {
+      setRecentList([]);
+      return;
+    }
+
+    const fetchRecent = async () => {
+      try {
+        const listResponse = await fetchNoticeList({
+          offset: 0,
+          limit: 100,
+        });
+
+        const foundNotices = recentNotices
+          .map((recentItem) => {
+            const found = listResponse.items.find(
+              ({ item }) => item.id === recentItem.id
+            );
+            return found ? transformNoticeData(found.item) : null;
+          })
+          .filter((item): item is TransformedNotice => item !== null);
+
+        setRecentList(foundNotices);
+      } catch (error) {
+        console.error('최근 본 공고 로딩 실패:', error);
+        setRecentList([]);
+      }
+    };
+
+    fetchRecent();
+  }, [recentNotices]);
+
+  if (!recentList.length) return null;
 
   return (
     <section className={className}>
       <h3 className="mb-4 text-lg font-bold">최근에 본 공고</h3>
 
       <div className="grid grid-cols-3 gap-4">
-        {recent.map(({ item }) => (
+        {recentList.map((notice) => (
           <Link
-            href={`/notices/${item.id}`}
-            key={item.id}
+            href={`/auth/shops/${notice.shopId}/notices/${notice.id}`}
+            key={notice.id}
             className="overflow-hidden rounded-xl bg-white shadow">
             <Image
-              src={item.shop.item.imageUrl}
-              alt={item.shop.item.name}
+              src={notice.imageUrl}
+              alt={notice.name}
               width={300}
               height={200}
               className="h-32 w-full object-cover"
             />
 
-            <div className="p-3 text-sm">{item.shop.item.name}</div>
+            <div className="p-3 text-sm">{notice.name}</div>
           </Link>
         ))}
       </div>

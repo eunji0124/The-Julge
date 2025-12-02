@@ -5,6 +5,8 @@ import {
   User,
   ApiLink,
   GetApplicationsQuery,
+  UpdateUserRequest,
+  UpdateUserResponse,
   UserApplicationsResponse,
 } from './types';
 
@@ -27,9 +29,11 @@ const users = {
     const response = await api.post<SignupResponse>('/users', data);
     return response;
   },
+
   getUser: (userId: string) => {
     return api.get<{ item: User }>(`/users/${userId}`);
   },
+
   /**
    * 사용자 정보 조회
    * @param userId - 사용자 ID
@@ -46,6 +50,20 @@ const users = {
    */
   checkProfileRegistered: (profile: User): boolean => {
     return !!(profile.name && profile.phone && profile.address);
+  },
+
+  /**
+   * 내 정보 수정
+   * @param userId - 사용자 ID
+   * @param data - 수정할 정보 (name, phone, address, bio)
+   * @returns 수정된 사용자 정보
+   */
+  updateUser: async (userId: string, data: UpdateUserRequest) => {
+    const response = await api.put<UpdateUserResponse>(
+      `/users/${userId}`,
+      data
+    );
+    return response;
   },
 
   /**

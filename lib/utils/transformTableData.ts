@@ -1,6 +1,6 @@
+import { ApplicationItem } from '@/api/types';
 import { formatPay } from '@/lib/utils/formatPay';
 import { formatWorkTime } from '@/lib/utils/formatWorkTime';
-
 // 사장님: API 응답 타입 정의
 interface EmployerApiItem {
   item: {
@@ -84,5 +84,16 @@ export const transformEmployeeData = (
     ).text,
     hourlyPay: formatPay(item.item.notice.item.hourlyPay),
     status: item.item.status,
+  }));
+};
+
+// transformTableData.ts
+export const transformApplicationData = (items: ApplicationItem[]) => {
+  return items.map((app) => ({
+    id: app.id,
+    name: app.user.item.name ?? '',
+    bio: app.user.item.bio ?? '',
+    phone: app.user.item.phone ?? '',
+    status: app.status,
   }));
 };

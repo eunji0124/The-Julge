@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import Head from 'next/head';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 
@@ -177,145 +178,151 @@ const Register = () => {
   const isFormDisabled = isLoading || isProfileLoading;
 
   return (
-    <div className="bg-gray-05 max-h-max min-h-[calc(100vh-231px)] px-3 pt-10 pb-20 sm:min-h-[calc(100vh-170px)] sm:px-8 sm:py-15">
-      <div className="mx-auto lg:max-w-[964px]">
-        {/* 제목 및 닫기 버튼 */}
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold sm:text-[28px] sm:tracking-[0.56px]">
-            내 프로필
-          </h2>
-          <button
-            onClick={handleClose}
-            disabled={isFormDisabled}
-            className="flex h-6 w-6 items-center justify-center disabled:cursor-not-allowed disabled:opacity-50 sm:h-8 sm:w-8">
-            <Image
-              src="/images/close.svg"
-              width={14}
-              height={14}
-              alt="내 프로필 등록 페이지 닫기"
-              className="sm:h-[18px] sm:w-[18px]"
-            />
-          </button>
-        </div>
-
-        {/* Form - 모바일: 1열, 태블릿: 2열, 데스크탑: 3열 */}
-        <div className="my-6 grid w-full grid-cols-1 grid-rows-1 items-center justify-center gap-5 sm:my-8 sm:grid-cols-2 sm:grid-rows-[min-content_min-content_min-content] sm:gap-6 sm:gap-x-5 lg:grid-cols-3 lg:grid-rows-[min-content_min-content]">
-          {/* 이름 */}
-          <div className={INPUT_BOX_STYLE}>
-            <label htmlFor="name">이름*</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              autoComplete="name"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="입력"
-              disabled={isFormDisabled}
-              className={INPUT_STYLE}
-            />
-          </div>
-
-          {/* 연락처 */}
-          <div className={INPUT_BOX_STYLE}>
-            <label htmlFor="phone">연락처*</label>
-            <input
-              type="tel"
-              id="phone"
-              name="phone"
-              autoComplete="tel"
-              value={formData.phone}
-              onChange={handleChange}
-              placeholder="입력"
-              disabled={isFormDisabled}
-              className={INPUT_STYLE}
-            />
-          </div>
-
-          {/* 선호 지역 */}
-          <div className={`${INPUT_BOX_STYLE} relative`}>
-            <label htmlFor="address">선호 지역</label>
+    <>
+      <Head>
+        <title>내 프로필 등록 | The-Julge</title>
+        <meta name="description" content="내 프로필 등록 페이지" />
+      </Head>
+      <div className="bg-gray-05 max-h-max min-h-[calc(100vh-231px)] px-3 pt-10 pb-20 sm:min-h-[calc(100vh-170px)] sm:px-8 sm:py-15">
+        <div className="mx-auto lg:max-w-[964px]">
+          {/* 제목 및 닫기 버튼 */}
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold sm:text-[28px] sm:tracking-[0.56px]">
+              내 프로필
+            </h2>
             <button
-              type="button"
-              onClick={handleDropdownToggle}
+              onClick={handleClose}
               disabled={isFormDisabled}
-              className={`${INPUT_STYLE} flex items-center justify-between`}>
-              <span
-                className={formData.address ? 'text-black' : 'text-gray-40'}>
-                {formData.address || '선택'}
-              </span>
-              {isDropdownOpen ? (
-                <Image
-                  src="/images/dropdownOpen.svg"
-                  width={16}
-                  height={16}
-                  alt="선호 지역 드롭다운 열기"
-                />
-              ) : (
-                <Image
-                  src="/images/dropdownClose.svg"
-                  width={16}
-                  height={16}
-                  alt="선호 지역 드롭다운 닫기"
+              className="flex h-6 w-6 items-center justify-center disabled:cursor-not-allowed disabled:opacity-50 sm:h-8 sm:w-8">
+              <Image
+                src="/images/close.svg"
+                width={14}
+                height={14}
+                alt="내 프로필 등록 페이지 닫기"
+                className="sm:h-[18px] sm:w-[18px]"
+              />
+            </button>
+          </div>
+
+          {/* Form - 모바일: 1열, 태블릿: 2열, 데스크탑: 3열 */}
+          <div className="my-6 grid w-full grid-cols-1 grid-rows-1 items-center justify-center gap-5 sm:my-8 sm:grid-cols-2 sm:grid-rows-[min-content_min-content_min-content] sm:gap-6 sm:gap-x-5 lg:grid-cols-3 lg:grid-rows-[min-content_min-content]">
+            {/* 이름 */}
+            <div className={INPUT_BOX_STYLE}>
+              <label htmlFor="name">이름*</label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                autoComplete="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="입력"
+                disabled={isFormDisabled}
+                className={INPUT_STYLE}
+              />
+            </div>
+
+            {/* 연락처 */}
+            <div className={INPUT_BOX_STYLE}>
+              <label htmlFor="phone">연락처*</label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                autoComplete="tel"
+                value={formData.phone}
+                onChange={handleChange}
+                placeholder="입력"
+                disabled={isFormDisabled}
+                className={INPUT_STYLE}
+              />
+            </div>
+
+            {/* 선호 지역 */}
+            <div className={`${INPUT_BOX_STYLE} relative`}>
+              <label htmlFor="address">선호 지역</label>
+              <button
+                type="button"
+                onClick={handleDropdownToggle}
+                disabled={isFormDisabled}
+                className={`${INPUT_STYLE} flex items-center justify-between`}>
+                <span
+                  className={formData.address ? 'text-black' : 'text-gray-40'}>
+                  {formData.address || '선택'}
+                </span>
+                {isDropdownOpen ? (
+                  <Image
+                    src="/images/dropdownOpen.svg"
+                    width={16}
+                    height={16}
+                    alt="선호 지역 드롭다운 열기"
+                  />
+                ) : (
+                  <Image
+                    src="/images/dropdownClose.svg"
+                    width={16}
+                    height={16}
+                    alt="선호 지역 드롭다운 닫기"
+                  />
+                )}
+              </button>
+
+              {isDropdownOpen && !isFormDisabled && (
+                <Dropdown
+                  items={[...SEOUL_DISTRICTS]}
+                  selected={formData.address}
+                  onSelect={handleAddressSelect}
+                  onClose={() => setIsDropdownOpen(false)}
                 />
               )}
-            </button>
+            </div>
 
-            {isDropdownOpen && !isFormDisabled && (
-              <Dropdown
-                items={[...SEOUL_DISTRICTS]}
-                selected={formData.address}
-                onSelect={handleAddressSelect}
-                onClose={() => setIsDropdownOpen(false)}
+            {/* 소개 */}
+            <div
+              className={`${INPUT_BOX_STYLE} sm:col-span-2 sm:col-start-1 lg:col-span-3`}>
+              <label htmlFor="bio">소개</label>
+              <textarea
+                name="bio"
+                id="bio"
+                value={formData.bio}
+                onChange={handleChange}
+                placeholder="입력"
+                rows={5}
+                disabled={isFormDisabled}
+                className={`${INPUT_STYLE} resize-none`}
               />
-            )}
+            </div>
           </div>
 
-          {/* 소개 */}
-          <div
-            className={`${INPUT_BOX_STYLE} sm:col-span-2 sm:col-start-1 lg:col-span-3`}>
-            <label htmlFor="bio">소개</label>
-            <textarea
-              name="bio"
-              id="bio"
-              value={formData.bio}
-              onChange={handleChange}
-              placeholder="입력"
-              rows={5}
-              disabled={isFormDisabled}
-              className={`${INPUT_STYLE} resize-none`}
-            />
+          {/* 등록하기 버튼 */}
+          <div className="align-center flex w-full justify-center">
+            <Button
+              variant="primary"
+              size="large"
+              onClick={onSubmit}
+              disabled={isFormDisabled || !hasFormChanged}>
+              {isFormDisabled ? '처리중...' : '등록하기'}
+            </Button>
           </div>
         </div>
 
-        {/* 등록하기 버튼 */}
-        <div className="align-center flex w-full justify-center">
-          <Button
-            variant="primary"
-            size="large"
-            onClick={onSubmit}
-            disabled={isFormDisabled || !hasFormChanged}>
-            {isFormDisabled ? '처리중...' : '등록하기'}
-          </Button>
-        </div>
-      </div>
+        {/* Modal */}
+        {errorModal.isOpen && (
+          <ErrorModal
+            message={errorModal.message}
+            onClose={isSuccessModal ? closeSuccessModal : closeModal}
+          />
+        )}
 
-      {/* Modal */}
-      {errorModal.isOpen && (
-        <ErrorModal
-          message={errorModal.message}
-          onClose={isSuccessModal ? closeSuccessModal : closeModal}
+        {/* 확인 Modal */}
+        <ConfirmModal
+          isOpen={confirmModal}
+          message="변경된 내용이 저장되지 않습니다.<br>페이지를 이동하시겠습니까?"
+          onConfirm={confirmLeave}
+          onCancel={() => setConfirmModal(false)}
         />
-      )}
-
-      {/* 확인 Modal */}
-      <ConfirmModal
-        isOpen={confirmModal}
-        message="변경된 내용이 저장되지 않습니다.<br>페이지를 이동하시겠습니까?"
-        onConfirm={confirmLeave}
-        onCancel={() => setConfirmModal(false)}
-      />
-    </div>
+      </div>
+    </>
   );
 };
 

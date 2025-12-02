@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 
 import { fetchNoticeList, FetchNoticeListParams } from '@/api/notices';
@@ -226,161 +227,31 @@ const NoticeListPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="pb-20">
-        {/* 로딩 오버레이 */}
-        {isLoading && (
-          <div className="bg-opacity-70 fixed inset-0 z-50 flex items-center justify-center bg-white">
-            <div className="rounded-lg bg-white px-6 py-4 shadow-lg">
-              <div className="text-lg font-medium text-gray-900">
-                로딩 중...
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* 검색 결과 영역 */}
-        {searchTerm ? (
-          <section className="mb-16">
-            <div className="mx-auto max-w-[964px] px-3 py-10 sm:px-8 sm:py-15 lg:px-0">
-              <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <h2 className="text-[20px] font-bold text-black sm:text-[28px]">
-                  "{searchTerm}"에 대한 공고 목록
-                </h2>
-                <div className="relative flex items-center gap-2">
-                  <div className="relative">
-                    <button
-                      onClick={handleSortDropdownToggle}
-                      className="flex h-[42px] items-center gap-2 rounded-[10px] border border-gray-300 px-4 text-sm outline-none hover:border-gray-400">
-                      <span>{sortType}</span>
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 16 16"
-                        fill="none"
-                        className={`transition-transform ${isSortOpen ? 'rotate-180' : ''}`}>
-                        <path
-                          d="M4 6L8 10L12 6"
-                          stroke="currentColor"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </button>
-                    {isSortOpen && (
-                      <Dropdown
-                        items={SORT_OPTIONS}
-                        selected={sortType}
-                        onSelect={handleSortSelect}
-                        onClose={() => setIsSortOpen(false)}
-                      />
-                    )}
-                  </div>
-                  <button
-                    onClick={() => setIsFilterModalOpen(true)}
-                    className="h-[42px] rounded-[10px] bg-[#FF5C3F] px-6 text-sm font-medium text-white hover:bg-[#FF4A2D]">
-                    상세 필터
-                  </button>
-                  <DetailFilterModal
-                    isOpen={isFilterModalOpen}
-                    onClose={() => setIsFilterModalOpen(false)}
-                    onApply={handleFilterApply}
-                    initialValues={filterValues}
-                  />
+    <>
+      <Head>
+        <title>공고 목록</title>
+        <meta name="description" content="공고 목록 페이지" />
+      </Head>
+      <div className="min-h-screen bg-white">
+        <div className="pb-20">
+          {/* 로딩 오버레이 */}
+          {isLoading && (
+            <div className="bg-opacity-70 fixed inset-0 z-50 flex items-center justify-center bg-white">
+              <div className="rounded-lg bg-white px-6 py-4 shadow-lg">
+                <div className="text-lg font-medium text-gray-900">
+                  로딩 중...
                 </div>
               </div>
-
-              {searchResults.length > 0 ? (
-                <>
-                  <div className="grid grid-cols-2 gap-3 pb-10 sm:gap-4 lg:grid-cols-3 lg:gap-6">
-                    {searchResults.map((notice) => (
-                      <Post
-                        key={notice.id}
-                        {...notice}
-                        className="max-w-none"
-                        onClick={() => {
-                          router.push(
-                            `/staff/shops/${notice.shopId}/notices/${notice.id}`
-                          );
-                        }}
-                      />
-                    ))}
-                  </div>
-                  <Pagination
-                    total={totalSearchCount}
-                    limit={ITEMS_PER_PAGE}
-                    page={searchPage}
-                    setPage={setSearchPage}
-                  />
-                </>
-              ) : (
-                <div className="py-20 text-center">
-                  <p className="text-gray-500">검색 결과가 없습니다.</p>
-                </div>
-              )}
             </div>
-          </section>
-        ) : (
-          <>
-            {/* 맞춤 공고 영역 */}
-            <section className="bg-red-10 mb-16 px-3 py-10 sm:px-8 sm:pt-15 lg:py-15">
-              <div className="mx-auto max-w-[964px]">
-                <h2 className="mb-6 px-4 text-[20px] font-bold text-black sm:px-0 sm:text-[28px]">
-                  맞춤 공고
-                </h2>
-                {customNotices.length > 0 ? (
-                  <>
-                    {/* 모바일/태블릿: 가로 스크롤 */}
-                    <div className="overflow-x-auto px-4 sm:px-0 lg:hidden">
-                      <div className="flex gap-3 sm:gap-4">
-                        {customNotices.map((notice) => (
-                          <div
-                            key={notice.id}
-                            className="w-[calc(50vw-24px)] flex-shrink-0 sm:w-[calc(50vw-32px)]">
-                            <Post
-                              {...notice}
-                              className="max-w-none"
-                              onClick={() => {
-                                router.push(
-                                  `/staff/shops/${notice.shopId}/notices/${notice.id}`
-                                );
-                              }}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    {/* 데스크탑: 그리드 */}
-                    <div className="hidden grid-cols-3 gap-6 lg:grid">
-                      {customNotices.map((notice) => (
-                        <Post
-                          key={notice.id}
-                          {...notice}
-                          className="max-w-none"
-                          onClick={() => {
-                            router.push(
-                              `/staff/shops/${notice.shopId}/notices/${notice.id}`
-                            );
-                          }}
-                        />
-                      ))}
-                    </div>
-                  </>
-                ) : (
-                  <div className="py-10 text-center">
-                    <p className="text-gray-500">맞춤 공고가 없습니다.</p>
-                  </div>
-                )}
-              </div>
-            </section>
+          )}
 
-            {/* 전체 공고 영역 */}
-            <section>
-              <div className="mx-auto max-w-[964px] px-3 py-10 sm:px-8 sm:pt-15 lg:px-0 lg:pt-15">
+          {/* 검색 결과 영역 */}
+          {searchTerm ? (
+            <section className="mb-16">
+              <div className="mx-auto max-w-[964px] px-3 py-10 sm:px-8 sm:py-15 lg:px-0">
                 <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <h2 className="text-[20px] font-bold text-black sm:text-[28px]">
-                    전체 공고
+                    "{searchTerm}"에 대한 공고 목록
                   </h2>
                   <div className="relative flex items-center gap-2">
                     <div className="relative">
@@ -426,39 +297,175 @@ const NoticeListPage = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 pb-10 sm:gap-4 lg:grid-cols-3 lg:gap-6">
-                  {allNotices.length > 0 ? (
-                    allNotices.map((notice) => (
-                      <Post
-                        key={notice.id}
-                        {...notice}
-                        className="max-w-none"
-                        onClick={() => {
-                          router.push(
-                            `/staff/shops/${notice.shopId}/notices/${notice.id}`
-                          );
-                        }}
-                      />
-                    ))
+                {searchResults.length > 0 ? (
+                  <>
+                    <div className="grid grid-cols-2 gap-3 pb-10 sm:gap-4 lg:grid-cols-3 lg:gap-6">
+                      {searchResults.map((notice) => (
+                        <Post
+                          key={notice.id}
+                          {...notice}
+                          className="max-w-none"
+                          onClick={() => {
+                            router.push(
+                              `/staff/shops/${notice.shopId}/notices/${notice.id}`
+                            );
+                          }}
+                        />
+                      ))}
+                    </div>
+                    <Pagination
+                      total={totalSearchCount}
+                      limit={ITEMS_PER_PAGE}
+                      page={searchPage}
+                      setPage={setSearchPage}
+                    />
+                  </>
+                ) : (
+                  <div className="py-20 text-center">
+                    <p className="text-gray-500">검색 결과가 없습니다.</p>
+                  </div>
+                )}
+              </div>
+            </section>
+          ) : (
+            <>
+              {/* 맞춤 공고 영역 */}
+              <section className="bg-red-10 mb-16 px-3 py-10 sm:px-8 sm:pt-15 lg:py-15">
+                <div className="mx-auto max-w-[964px]">
+                  <h2 className="mb-6 px-4 text-[20px] font-bold text-black sm:px-0 sm:text-[28px]">
+                    맞춤 공고
+                  </h2>
+                  {customNotices.length > 0 ? (
+                    <>
+                      {/* 모바일/태블릿: 가로 스크롤 */}
+                      <div className="overflow-x-auto px-4 sm:px-0 lg:hidden">
+                        <div className="flex gap-3 sm:gap-4">
+                          {customNotices.map((notice) => (
+                            <div
+                              key={notice.id}
+                              className="w-[calc(50vw-24px)] shrink-0 sm:w-[calc(50vw-32px)]">
+                              <Post
+                                {...notice}
+                                className="max-w-none"
+                                onClick={() => {
+                                  router.push(
+                                    `/staff/shops/${notice.shopId}/notices/${notice.id}`
+                                  );
+                                }}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      {/* 데스크탑: 그리드 */}
+                      <div className="hidden grid-cols-3 gap-6 lg:grid">
+                        {customNotices.map((notice) => (
+                          <Post
+                            key={notice.id}
+                            {...notice}
+                            className="max-w-none"
+                            onClick={() => {
+                              router.push(
+                                `/staff/shops/${notice.shopId}/notices/${notice.id}`
+                              );
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </>
                   ) : (
-                    <div className="col-span-2 py-20 text-center lg:col-span-3">
-                      <p className="text-gray-500">전체 공고가 없습니다.</p>
+                    <div className="py-10 text-center">
+                      <p className="text-gray-500">맞춤 공고가 없습니다.</p>
                     </div>
                   )}
                 </div>
+              </section>
 
-                <Pagination
-                  total={totalAllCount}
-                  limit={ITEMS_PER_PAGE}
-                  page={allPage}
-                  setPage={setAllPage}
-                />
-              </div>
-            </section>
-          </>
-        )}
+              {/* 전체 공고 영역 */}
+              <section>
+                <div className="mx-auto max-w-[964px] px-3 py-10 sm:px-8 sm:pt-15 lg:px-0 lg:pt-15">
+                  <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <h2 className="text-[20px] font-bold text-black sm:text-[28px]">
+                      전체 공고
+                    </h2>
+                    <div className="relative flex items-center gap-2">
+                      <div className="relative">
+                        <button
+                          onClick={handleSortDropdownToggle}
+                          className="flex h-[42px] items-center gap-2 rounded-[10px] border border-gray-300 px-4 text-sm outline-none hover:border-gray-400">
+                          <span>{sortType}</span>
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 16 16"
+                            fill="none"
+                            className={`transition-transform ${isSortOpen ? 'rotate-180' : ''}`}>
+                            <path
+                              d="M4 6L8 10L12 6"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </button>
+                        {isSortOpen && (
+                          <Dropdown
+                            items={SORT_OPTIONS}
+                            selected={sortType}
+                            onSelect={handleSortSelect}
+                            onClose={() => setIsSortOpen(false)}
+                          />
+                        )}
+                      </div>
+                      <button
+                        onClick={() => setIsFilterModalOpen(true)}
+                        className="h-[42px] rounded-[10px] bg-[#FF5C3F] px-6 text-sm font-medium text-white hover:bg-[#FF4A2D]">
+                        상세 필터
+                      </button>
+                      <DetailFilterModal
+                        isOpen={isFilterModalOpen}
+                        onClose={() => setIsFilterModalOpen(false)}
+                        onApply={handleFilterApply}
+                        initialValues={filterValues}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 pb-10 sm:gap-4 lg:grid-cols-3 lg:gap-6">
+                    {allNotices.length > 0 ? (
+                      allNotices.map((notice) => (
+                        <Post
+                          key={notice.id}
+                          {...notice}
+                          className="max-w-none"
+                          onClick={() => {
+                            router.push(
+                              `/staff/shops/${notice.shopId}/notices/${notice.id}`
+                            );
+                          }}
+                        />
+                      ))
+                    ) : (
+                      <div className="col-span-2 py-20 text-center lg:col-span-3">
+                        <p className="text-gray-500">전체 공고가 없습니다.</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <Pagination
+                    total={totalAllCount}
+                    limit={ITEMS_PER_PAGE}
+                    page={allPage}
+                    setPage={setAllPage}
+                  />
+                </div>
+              </section>
+            </>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

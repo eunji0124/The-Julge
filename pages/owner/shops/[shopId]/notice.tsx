@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 
 import axios from 'axios';
@@ -11,6 +12,7 @@ import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
 import AlertModal from '@/components/common/modal/AlertModal';
 import BadgeClose from '@/components/icons/BadgeClose';
+import { useAuthRedirect } from '@/hooks/useAuthRedirect';
 
 const PostNotice = () => {
   const [hourlyPay, setHourlyPay] = useState('');
@@ -25,17 +27,8 @@ const PostNotice = () => {
   const [errorModalOpen, setErrorModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // 로그인 체크 및 shopId 확인
-  useEffect(() => {
-    const checkAuth = () => {
-      const userId = localStorage.getItem('userId');
-      if (!userId) {
-        router.push('/login');
-        return;
-      }
-    };
-    checkAuth();
-  }, [router]);
+  // 인증 체크: 로그인하지 않은 경우 /login으로 리다이렉트
+  const { isAuthenticated } = useAuthRedirect('/login');
 
   // 가게 정보 불러오기 (originalHourlyPay 가져오기)
   useEffect(() => {
@@ -54,6 +47,11 @@ const PostNotice = () => {
 
     fetchShopData();
   }, [shopId]);
+
+  // 인증되지 않았을 때 (리다이렉트 중)
+  if (!isAuthenticated) {
+    return null;
+  }
 
   // shopId가 없으면 로딩 상태 표시
   if (!shopId) {
@@ -153,13 +151,17 @@ const PostNotice = () => {
 
   return (
     <>
+      <Head>
+        <title>공고 등록 | The-Julge</title>
+        <meta name="description" content="공고 등록 페이지" />
+      </Head>
       <div className="flex min-h-screen w-full flex-col items-center px-4 py-10 md:px-8 md:py-16">
         {/* 상단 제목 + 닫기 버튼 */}
         <div className="mb-8 flex w-full max-w-[964px] items-center justify-between">
           <h1 className="text-2xl font-bold md:text-[28px]">공고 등록</h1>
           <div
             onClick={() => router.push(`/owner/shops/${shopId}`)}
-            className="h-8 w-8 flex-shrink-0 cursor-pointer">
+            className="h-8 w-8 shrink-0 cursor-pointer">
             <BadgeClose />
           </div>
         </div>

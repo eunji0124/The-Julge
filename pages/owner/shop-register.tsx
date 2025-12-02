@@ -1,14 +1,17 @@
-import ShopRegisterForm from '@/components/owner/ShopRegisterForm';
-import Head from "next/head";
+import Head from 'next/head';
 
-export default function ShopRegisterPage() {
+import ShopRegisterForm from '@/components/owner/ShopRegisterForm';
+
+const ShopRegisterPage = () => {
   return (
     <>
       <Head>
-        <title>가게 등록 - The Julge</title>
+        <title>가게 등록 | The-Julge</title>
+        <meta name="description" content="가게 등록 페이지" />
       </Head>
-
       <ShopRegisterForm />
     </>
   );
-}
+};
+
+export default ShopRegisterPage;

@@ -244,7 +244,7 @@ const ShopEditForm = () => {
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="h-[160px] w-full resize-none rounded-md border border-gray-300 p-3"
+          className="h-40 w-full resize-none rounded-md border border-gray-300 p-3"
         />
       </div>
 

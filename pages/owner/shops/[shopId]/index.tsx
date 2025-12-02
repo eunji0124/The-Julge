@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 
 import noticesApi from '@/api/owner/notice';
@@ -9,6 +10,8 @@ import users from '@/api/users';
 import Button from '@/components/common/Button';
 import ShopBanner from '@/components/owner/ShopBanner';
 import Post from '@/components/post/Post';
+import { useAuthRedirect } from '@/hooks/useAuthRedirect';
+import { useAuthStore } from '@/store/useAuthStore';
 import { calculatePercentage } from '@/utils/transformNotice';
 
 const MyShop = () => {
@@ -37,30 +40,24 @@ const MyShop = () => {
       ? (shop.category as Category)
       : '기타';
 
-  // 로그인 체크
-  useEffect(() => {
-    const checkAuth = () => {
-      const userId = localStorage.getItem('userId');
-      if (!userId) {
-        router.push('/login');
-      }
-    };
-    checkAuth();
-  }, [router]);
+  // 인증 체크: 로그인하지 않은 경우 /login으로 리다이렉트
+  const { isAuthenticated } = useAuthRedirect('/login');
+
+  // Zustand에서 user 정보 가져오기
+  const { user } = useAuthStore();
+  const userId = user?.id || '';
 
   useEffect(() => {
     const fetchShopAndNotices = async () => {
       try {
-        const userId = localStorage.getItem('userId');
-
-        if (!userId) {
+        if (!isAuthenticated) {
           setError('로그인이 필요합니다.');
           return;
         }
         // 가게 유무
         const userRes = await users.getUser(userId);
-        const user = userRes?.item;
-        const shopItem = user?.shop?.item;
+        const userInfo = userRes?.item;
+        const shopItem = userInfo?.shop?.item;
         if (!shopItem) {
           setError('유저의 가게 정보가 없습니다.');
           return;
@@ -83,7 +80,7 @@ const MyShop = () => {
       }
     };
     fetchShopAndNotices();
-  }, []);
+  }, [isAuthenticated, userId]);
 
   const handlePostClick = (shopId: string, noticeId: string) => {
     router.push(`/owner/shops/${shopId}/notices/${noticeId}`);
@@ -99,6 +96,10 @@ const MyShop = () => {
 
   return (
     <>
+      <Head>
+        <title>가게 정보 상세 | The-Julge</title>
+        <meta name="description" content="가게 정보 상세 페이지" />
+      </Head>
       <div className="mx-auto max-w-[1440px] px-6 pt-15">
         <div className="mx-auto w-[964px] max-[744px]:w-[680px] max-[375px]:w-[351px]">
           <h1 className="mb-6 text-[28px] font-bold max-[375px]:mb-[16px] max-[375px]:text-[20px]">
@@ -134,7 +135,7 @@ const MyShop = () => {
       {!loading && !error && shop && (
         <div className="mx-auto max-w-[1440px] px-6 pt-15">
           <div className="mx-auto w-[964px] max-[744px]:w-[680px] max-[375px]:w-[351px]">
-            <h2 className="mb-6 text-[28px] font-[700] max-[744px]:mb-[24px] max-[375px]:mb-[16px] max-[375px]:text-[20px]">
+            <h2 className="mb-6 text-[28px] font-bold max-[744px]:mb-[24px] max-[375px]:mb-[16px] max-[375px]:text-[20px]">
               내가 등록한 공고
             </h2>
 
@@ -159,7 +160,7 @@ const MyShop = () => {
                     />
                   ))
                 ) : (
-                  <div className="border-gray-20 flex flex-col items-center justify-center gap-6 rounded-xl border px-6 py-[60px]">
+                  <div className="border-gray-20 col-span-3 flex flex-col items-center justify-center gap-6 rounded-xl border px-6 py-[60px]">
                     <div className="text-[16px] max-[375px]:text-[14px]">
                       공고를 등록해 보세요.
                     </div>

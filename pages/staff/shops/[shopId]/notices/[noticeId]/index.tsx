@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 
 import { isAxiosError } from 'axios';
@@ -284,109 +285,115 @@ const NoticeDetailPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* 상단 카테고리 & 제목 */}
-      <div className="bg-white pt-15">
-        <div className="mx-auto max-w-[964px] px-3 sm:px-8 lg:px-0">
-          <p className="mb-2 text-[14px] leading-[22px] font-bold text-[#FF5C3F]">
-            식당
-          </p>
-          <h1 className="text-[20px] leading-8 font-bold text-black sm:text-[28px] sm:leading-9">
-            {noticeDetail.name}
-          </h1>
-        </div>
-      </div>
-
-      {/* PostBannerUser 영역 */}
-      <div className="bg-white pt-6">
-        <div className="flex justify-center px-3 sm:px-8 lg:px-0">
-          <PostBannerUser
-            name={noticeDetail.name}
-            startAt={noticeDetail.startAt}
-            workTime={noticeDetail.workTime}
-            location={noticeDetail.location}
-            wage={noticeDetail.wage}
-            imageUrl={noticeDetail.imageUrl}
-            percentage={noticeDetail.percentage}
-            description={noticeDetail.description || '공고 설명입니다.'}
-            isActive={noticeDetail.isActive}
-            applicationStatus={applicationStatus}
-            onApply={handleApply}
-            onCancel={handleCancelClick}
-          />
-        </div>
-      </div>
-
-      {/* 공고 설명 */}
-      <div className="bg-white px-3 pt-6 pb-15 sm:px-8 lg:px-0">
-        <div className="bg-gray-10 mx-auto max-w-[964px] rounded-xl px-9 py-9 sm:px-8 lg:px-9 lg:py-9">
-          <h2 className="mb-2 text-[20px] leading-[32px] font-bold text-black">
-            공고 설명
-          </h2>
-          <p className="text-[14px] leading-[22px] whitespace-pre-wrap text-black sm:text-[16px] sm:leading-[26px]">
-            {noticeDetail.description || '공고 설명입니다.'}
-          </p>
-        </div>
-      </div>
-
-      {/* 최근 본 공고 */}
-      {recentNoticesList.length > 0 && (
-        <div className="mt-16 pb-20">
+    <>
+      <Head>
+        <title>공고 상세 | The-Julge</title>
+        <meta name="description" content="공고 상세 페이지" />
+      </Head>
+      <div className="min-h-screen bg-white">
+        {/* 상단 카테고리 & 제목 */}
+        <div className="bg-white pt-15">
           <div className="mx-auto max-w-[964px] px-3 sm:px-8 lg:px-0">
-            <h2 className="mb-6 text-[20px] leading-[32px] font-bold text-black sm:text-[28px] sm:leading-[36px]">
-              최근에 본 공고
-            </h2>
-
-            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 lg:gap-6">
-              {recentNoticesList.map((notice) => (
-                <div
-                  key={notice.id}
-                  onClick={() => handleNoticeClick(notice.shopId, notice.id)}
-                  className="cursor-pointer">
-                  <Post
-                    name={notice.name}
-                    startAt={notice.startAt}
-                    workTime={notice.workTime}
-                    location={notice.location}
-                    wage={notice.wage}
-                    imageUrl={notice.imageUrl}
-                    isActive={notice.isActive}
-                    percentage={notice.percentage}
-                    className="max-w-none"
-                  />
-                </div>
-              ))}
-            </div>
+            <p className="mb-2 text-[14px] leading-[22px] font-bold text-[#FF5C3F]">
+              식당
+            </p>
+            <h1 className="text-[20px] leading-8 font-bold text-black sm:text-[28px] sm:leading-9">
+              {noticeDetail.name}
+            </h1>
           </div>
         </div>
-      )}
 
-      {/* 취소 확인 모달 */}
-      <ConfirmModal
-        isOpen={isCancelModalOpen}
-        message="신청을 취소하시겠어요?"
-        onConfirm={handleCancelConfirm}
-        onCancel={handleCancelCancel}
-      />
+        {/* PostBannerUser 영역 */}
+        <div className="bg-white pt-6">
+          <div className="flex justify-center px-3 sm:px-8 lg:px-0">
+            <PostBannerUser
+              name={noticeDetail.name}
+              startAt={noticeDetail.startAt}
+              workTime={noticeDetail.workTime}
+              location={noticeDetail.location}
+              wage={noticeDetail.wage}
+              imageUrl={noticeDetail.imageUrl}
+              percentage={noticeDetail.percentage}
+              description={noticeDetail.description || '공고 설명입니다.'}
+              isActive={noticeDetail.isActive}
+              applicationStatus={applicationStatus}
+              onApply={handleApply}
+              onCancel={handleCancelClick}
+            />
+          </div>
+        </div>
 
-      {/* 프로필 미등록 알림 모달 */}
-      <AlertModal
-        isOpen={isProfileAlertOpen}
-        message="내 프로필을 먼저 등록해 주세요."
-        onClose={() => setIsProfileAlertOpen(false)}
-      />
+        {/* 공고 설명 */}
+        <div className="bg-white px-3 pt-6 pb-15 sm:px-8 lg:px-0">
+          <div className="bg-gray-10 mx-auto max-w-[964px] rounded-xl px-9 py-9 sm:px-8 lg:px-9 lg:py-9">
+            <h2 className="mb-2 text-[20px] leading-8 font-bold text-black">
+              공고 설명
+            </h2>
+            <p className="text-[14px] leading-[22px] whitespace-pre-wrap text-black sm:text-[16px] sm:leading-[26px]">
+              {noticeDetail.description || '공고 설명입니다.'}
+            </p>
+          </div>
+        </div>
 
-      {/* 공고 리스트 버튼 */}
-      <div className="fixed right-6 bottom-6 z-50">
-        <Button
-          variant="primary"
-          size="medium"
-          className="!max-w-none px-4"
-          onClick={() => router.push(`/staff/notices`)}>
-          공고목록
-        </Button>
+        {/* 최근 본 공고 */}
+        {recentNoticesList.length > 0 && (
+          <div className="mt-16 pb-20">
+            <div className="mx-auto max-w-[964px] px-3 sm:px-8 lg:px-0">
+              <h2 className="mb-6 text-[20px] leading-8 font-bold text-black sm:text-[28px] sm:leading-9">
+                최근에 본 공고
+              </h2>
+
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 lg:gap-6">
+                {recentNoticesList.map((notice) => (
+                  <div
+                    key={notice.id}
+                    onClick={() => handleNoticeClick(notice.shopId, notice.id)}
+                    className="cursor-pointer">
+                    <Post
+                      name={notice.name}
+                      startAt={notice.startAt}
+                      workTime={notice.workTime}
+                      location={notice.location}
+                      wage={notice.wage}
+                      imageUrl={notice.imageUrl}
+                      isActive={notice.isActive}
+                      percentage={notice.percentage}
+                      className="max-w-none"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 취소 확인 모달 */}
+        <ConfirmModal
+          isOpen={isCancelModalOpen}
+          message="신청을 취소하시겠어요?"
+          onConfirm={handleCancelConfirm}
+          onCancel={handleCancelCancel}
+        />
+
+        {/* 프로필 미등록 알림 모달 */}
+        <AlertModal
+          isOpen={isProfileAlertOpen}
+          message="내 프로필을 먼저 등록해 주세요."
+          onClose={() => setIsProfileAlertOpen(false)}
+        />
+
+        {/* 공고 리스트 버튼 */}
+        <div className="fixed right-6 bottom-6 z-50">
+          <Button
+            variant="primary"
+            size="medium"
+            className="max-w-none! px-4"
+            onClick={() => router.push(`/staff/notices`)}>
+            공고목록
+          </Button>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

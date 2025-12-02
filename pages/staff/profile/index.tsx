@@ -1,3 +1,5 @@
+import Head from 'next/head';
+
 import Table from '@/components/common/Table';
 import EmptyProfileState from '@/components/profile/EmptyProfileState';
 import UserProfileCard from '@/components/profile/UserProfileCard';
@@ -159,22 +161,28 @@ const Profile = () => {
   }
 
   return (
-    <div className="max-h-max min-h-[calc(100vh-231px)] sm:min-h-[calc(100vh-170px)]">
-      {/* 내 프로필 */}
-      <div
-        className={`mx-auto flex flex-col gap-4 px-3 py-10 sm:gap-6 sm:px-8 sm:py-15 lg:max-w-[964px] ${profile ? 'lg:flex-row lg:justify-between lg:gap-0' : ''}`}>
-        <h2 className={TITLE_STYLE}>내 프로필</h2>
-        {getProfileContent()}
-      </div>
-
-      {/* 신청 내역  */}
-      {profile && (
-        <div className="mx-auto flex flex-col gap-4 px-3 pt-10 pb-20 sm:gap-8 sm:px-8 sm:pt-15 sm:pb-30 lg:max-w-[964px]">
-          <h2 className={TITLE_STYLE}>신청 내역</h2>
-          {getApplicationsContent()}
+    <>
+      <Head>
+        <title>내 프로필 상세 | The-Julge</title>
+        <meta name="description" content="내 프로필 상세 페이지" />
+      </Head>
+      <div className="max-h-max min-h-[calc(100vh-231px)] sm:min-h-[calc(100vh-170px)]">
+        {/* 내 프로필 */}
+        <div
+          className={`mx-auto flex flex-col gap-4 px-3 py-10 sm:gap-6 sm:px-8 sm:py-15 lg:max-w-[964px] ${profile ? 'lg:flex-row lg:justify-between lg:gap-0' : ''}`}>
+          <h2 className={TITLE_STYLE}>내 프로필</h2>
+          {getProfileContent()}
         </div>
-      )}
-    </div>
+
+        {/* 신청 내역  */}
+        {profile && (
+          <div className="mx-auto flex flex-col gap-4 px-3 pt-10 pb-20 sm:gap-8 sm:px-8 sm:pt-15 sm:pb-30 lg:max-w-[964px]">
+            <h2 className={TITLE_STYLE}>신청 내역</h2>
+            {getApplicationsContent()}
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 

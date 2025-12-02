@@ -1,15 +1,19 @@
 // pages/owner/notice/[noticeId].tsx
 import { useEffect, useState } from 'react';
+
+import Head from 'next/head';
 import { useRouter } from 'next/router';
+
 import axios from 'axios';
+
 import applications from '@/api/owner/application';
 import notices from '@/api/owner/notice';
 import { ApplicationItem, NoticeRequest, ShopRequest } from '@/api/types';
+import AlertModal from '@/components/common/modal/AlertModal';
 import Table from '@/components/common/Table';
 import PostBanner from '@/components/owner/PostBanner';
 import { transformApplicationData } from '@/lib/utils/transformTableData';
 import { calculatePercentage } from '@/utils/transformNotice';
-import AlertModal from '@/components/common/modal/AlertModal';
 
 const NoticeDetail = () => {
   const router = useRouter();
@@ -128,6 +132,7 @@ const NoticeDetail = () => {
       setErrorMessage('지원을 승인했습니다.');
       setErrorModalOpen(true);
     } catch (e) {
+      console.error('승인 실패:', e);
       setErrorMessage('승인에 실패했습니다.');
       setErrorModalOpen(true);
     } finally {
@@ -160,6 +165,7 @@ const NoticeDetail = () => {
       setErrorMessage('지원을 거절했습니다.');
       setErrorModalOpen(true);
     } catch (e) {
+      console.error('거절 실패:', e);
       setErrorMessage('거절에 실패했습니다.');
       setErrorModalOpen(true);
     } finally {
@@ -171,6 +177,10 @@ const NoticeDetail = () => {
 
   return (
     <>
+      <Head>
+        <title>공고 상세 | The-Julge</title>
+        <meta name="description" content="공고 상세 페이지" />
+      </Head>
       <div className="mx-auto max-w-[1440px] px-6 pt-6">
         <div className="mx-auto w-[964px] max-[744px]:w-[680px] max-[375px]:w-[351px]">
           {shop && (

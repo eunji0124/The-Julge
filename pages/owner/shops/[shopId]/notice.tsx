@@ -1,21 +1,43 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+
 import { useRouter } from 'next/router';
+
+import { toast } from 'react-toastify';
+
 import noticesApi from '@/api/owner/notice';
 import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
 import BadgeClose from '@/components/icons/BadgeClose';
-import { toast } from 'react-toastify';
 
 const PostNotice = () => {
   const [hourlyPay, setHourlyPay] = useState('');
   const [startsAt, setStartsAt] = useState('');
   const [workhour, setWorkhour] = useState('');
   const [description, setDescription] = useState('');
-  // const { shopId: paramShopId } = useParams<{ shopId: string }>();
-  // const [shopId, setShopId] = useState<string | undefined>(paramShopId);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const router = useRouter();
+  const { shopId } = router.query;
+
+  // 로그인 체크 및 shopId 확인
+  useEffect(() => {
+    const checkAuth = () => {
+      const userId = localStorage.getItem('userId');
+      if (!userId) {
+        router.push('/login');
+        return;
+      }
+    };
+    checkAuth();
+  }, [router]);
+
+  // shopId가 없으면 로딩 상태 표시
+  if (!shopId) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        로딩중...
+      </div>
+    );
+  }
 
   const getTodayDateTime = () => {
     const now = new Date();
@@ -27,16 +49,6 @@ const PostNotice = () => {
 
     return `${year}-${month}-${day} ${hours}:${minutes}`;
   };
-  // 로그인 체크
-  useEffect(() => {
-    const checkAuth = () => {
-      const userId = localStorage.getItem('userId');
-      if (!userId) {
-        router.push('/login');
-      }
-    };
-    checkAuth();
-  }, [router]);
 
   // 자동 높이 조절
   const adjustTextareaHeight = () => {
@@ -47,16 +59,6 @@ const PostNotice = () => {
     }
   };
 
-  // useEffect(() => {
-  //   // 클라이언트에서만 실행
-  //   if (typeof window !== 'undefined' && !shopId) {
-  //     const pathname = window.location.pathname;
-  //     const extractedShopId = pathname.split('/')[3];
-  //     setShopId(extractedShopId);
-  //   }
-  // }, [shopId]);
-  const { shopId } = useParams<{ shopId: string }>();
-
   // 입력 "YYYY-MM-DD HH:mm" → "YYYY-MM-DDTHH:mm:00Z" 로 변환
   const toISOZ = (dateStr: string) => {
     const [date, time] = dateStr.split(' ');
@@ -65,13 +67,13 @@ const PostNotice = () => {
 
   const handleSubmit = async () => {
     if (!hourlyPay || !startsAt || !workhour) {
-      alert('필수 항목을 모두 입력해주세요.');
+      toast.error('필수 항목을 모두 입력해주세요.');
       return;
     }
     // 날짜 형식 검증
     const datePattern = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/;
     if (!datePattern.test(startsAt)) {
-      alert('시작 시간 형식이 올바르지 않습니다. (예: 2025-12-23 13:00)');
+      toast.error('시작 시간 형식이 올바르지 않습니다. (예: 2025-12-23 13:00)');
       return;
     }
 
@@ -83,10 +85,11 @@ const PostNotice = () => {
         description,
       };
 
-      const res = await noticesApi.postShopNotice(shopId, payload);
-
+      await noticesApi.postShopNotice(shopId as string, payload);
       toast.success('공고가 등록되었습니다!');
+      router.push(`/owner/shops/${shopId}`);
     } catch (e) {
+      console.error(e);
       toast.error('등록 중 오류가 발생했습니다.');
     }
   };
@@ -150,7 +153,7 @@ const PostNotice = () => {
           }}
           placeholder="공고 설명을 입력하세요"
           rows={4}
-          className="focus:border-blue-20 ffocus:outline-none w-full resize-none overflow-hidden rounded-md border border-gray-300 px-4 py-3 transition-colors outline-none"
+          className="focus:border-blue-20 w-full resize-none overflow-hidden rounded-md border border-gray-300 px-4 py-3 transition-colors outline-none focus:outline-none"
         />
       </div>
 

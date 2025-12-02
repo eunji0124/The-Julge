@@ -146,7 +146,6 @@ const NoticeDetail = () => {
             : app
         )
       );
-
       alert('지원을 거절했습니다.');
     } catch (error) {
       console.error('거절 실패:', error);

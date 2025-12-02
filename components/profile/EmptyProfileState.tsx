@@ -10,10 +10,10 @@ import Button from '../common/Button';
  * const Ex = () {
  *   return (
  *     <div>
- *      // 프로필 미등록 상태
- *      <EmptyProfileState variant="profile" />
- *      // 지원 내역 없음 상태
- *      <EmptyProfileState variant="applications" />
+ *      <EmptyProfileState
+ *        message="내 프로필을 등록하고 원하는 가게에 지원해 보세요."
+ *        buttonText="내 프로필 등록하기"
+ *        link='/staff/profile/register'/>
  *     </div>
  *   );
  * }
@@ -22,48 +22,42 @@ import Button from '../common/Button';
 
 // EmptyProfileState 컴포넌트의 props 타입 정의
 interface EmptyStateProps {
-  variant: 'profile' | 'applications';
+  message: string;
+  buttonText?: string | undefined;
+  link?: string | undefined;
 }
 
-/**
- * variant에 따른 빈 상태 데이터 상수
- * - profile: 프로필 미등록 상태
- * - applications: 지원 내역 없음 상태
- */
-const EMPTY_STATE_DATA = {
-  profile: {
-    message: '내 프로필을 등록하고 원하는 가게에 지원해 보세요.',
-    buttonText: '내 프로필 등록하기',
-    link: '/staff/profile/register',
-  },
-  applications: {
-    message: '아직 신청 내역이 없어요.',
-    buttonText: '공고 보러가기',
-    link: '/',
-  },
-};
-
-const EmptyProfileState: React.FC<EmptyStateProps> = ({ variant }) => {
+const EmptyProfileState: React.FC<EmptyStateProps> = ({
+  message,
+  buttonText,
+  link,
+}) => {
   const router = useRouter();
 
-  // variant에 따른 데이터 추출
-  const { message, buttonText, link } = EMPTY_STATE_DATA[variant];
+  const handleButtonClick = () => {
+    if (link) {
+      router.push(link);
+    }
+  };
 
   return (
-    <div className="border-gray-20 flex w-full flex-col items-center justify-center gap-4 rounded-xl border px-6 py-15">
+    <div
+      className={`border-gray-20 flex w-full flex-col items-center justify-center rounded-xl border px-6 py-15 ${buttonText ? 'gap-4' : ''}`}>
       {/* 안내 메시지 */}
       <p className="text-sm leading-[22px] font-normal sm:text-base sm:leading-relaxed">
         {message}
       </p>
 
       {/* 액션 버튼 */}
-      <Button
-        variant="primary"
-        size="large"
-        onClick={() => router.push(link)}
-        className="max-w-fit px-5 py-2.5 text-sm sm:px-[136px] sm:py-3.5 sm:text-base sm:leading-5">
-        {buttonText}
-      </Button>
+      {buttonText && link && (
+        <Button
+          variant="primary"
+          size="large"
+          onClick={handleButtonClick}
+          className="max-w-fit px-5 py-2.5 text-sm sm:px-[136px] sm:py-3.5 sm:text-base sm:leading-5">
+          {buttonText}
+        </Button>
+      )}
     </div>
   );
 };

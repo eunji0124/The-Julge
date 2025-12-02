@@ -24,12 +24,27 @@ const SORT_OPTIONS: SortType[] = [
   '가나다순',
 ];
 
+// SortType을 백엔드 API 파라미터로 변환
+const getSortParams = (
+  sortType: SortType
+): { sort: 'time' | 'pay' | 'hour' | 'shop'; order: 'asc' | 'desc' } => {
+  switch (sortType) {
+    case '마감임박순':
+      return { sort: 'time', order: 'asc' };
+    case '시급많은순':
+      return { sort: 'pay', order: 'desc' };
+    case '시간적은순':
+      return { sort: 'hour', order: 'asc' };
+    case '가나다순':
+      return { sort: 'shop', order: 'asc' };
+    default:
+      return { sort: 'time', order: 'asc' };
+  }
+};
+
 const NoticeListPage = () => {
   const router = useRouter();
   const { search: rawSearch } = router.query;
-
-  // 검색 input 상태
-  const [searchInput, setSearchInput] = useState('');
 
   // 페이지 상태
   const [allPage, setAllPage] = useState(1);
@@ -78,92 +93,19 @@ const NoticeListPage = () => {
     return rawSearch;
   }, [rawSearch]);
 
-  // URL에서 검색어가 있으면 input에 동기화
-  useEffect(() => {
-    if (searchTerm) {
-      setSearchInput(searchTerm);
-    }
-  }, [searchTerm]);
-
-  // 검색 실행 함수
-  const handleSearch = useCallback(() => {
-    if (searchInput.trim()) {
-      router.push(
-        {
-          pathname: router.pathname,
-          query: { search: searchInput.trim() },
-        },
-        undefined,
-        { shallow: true }
-      );
-    } else {
-      router.push(
-        {
-          pathname: router.pathname,
-        },
-        undefined,
-        { shallow: true }
-      );
-    }
-  }, [searchInput, router]);
-
-  // Enter 키 입력 처리
-  const handleKeyPress = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter') {
-        handleSearch();
-      }
-    },
-    [handleSearch]
-  );
-
-  // 검색어 초기화
-  const handleClearSearch = useCallback(() => {
-    setSearchInput('');
-    router.push(
-      {
-        pathname: router.pathname,
-      },
-      undefined,
-      { shallow: true }
-    );
-  }, [router]);
-
-  // 클라이언트 정렬 함수
-  const sortNotices = useCallback(
-    (notices: TransformedNotice[], targetSort: SortType) => {
-      const sorted = [...notices];
-      switch (targetSort) {
-        case '마감임박순':
-          return sorted.sort(
-            (a, b) =>
-              new Date(a.startAt).getTime() - new Date(b.startAt).getTime()
-          );
-        case '시급많은순':
-          return sorted.sort((a, b) => b.wage - a.wage);
-        case '시간적은순':
-          return sorted.sort((a, b) => a.workTime - b.workTime);
-        case '가나다순':
-          return sorted.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
-        default:
-          return sorted;
-      }
-    },
-    []
-  );
-
   // 맞춤 공고 불러오기 (시급 높은 순 3개)
   const loadCustomNotices = useCallback(async () => {
     try {
       const data = await fetchNoticeList({
         offset: 0,
-        limit: 20,
+        limit: 3,
+        sort: 'pay',
+        order: 'desc',
       });
 
-      const transformed = data.items
-        .map(({ item }) => transformNoticeData(item))
-        .sort((a, b) => b.wage - a.wage)
-        .slice(0, 3);
+      const transformed = data.items.map(({ item }) =>
+        transformNoticeData(item)
+      );
 
       setCustomNotices(transformed);
     } catch (error) {
@@ -180,10 +122,13 @@ const NoticeListPage = () => {
   const loadAllNotices = useCallback(async () => {
     setIsLoading(true);
     try {
-      // API 파라미터 구성
+      // 백엔드 정렬 파라미터 추가
+      const sortParams = getSortParams(sortType);
+
       const baseParams: FetchNoticeListParams = {
         offset: (allPage - 1) * ITEMS_PER_PAGE,
         limit: ITEMS_PER_PAGE,
+        ...sortParams, // 백엔드 정렬 파라미터
       };
 
       const filterParams = buildFilterParams(filterValues);
@@ -195,10 +140,8 @@ const NoticeListPage = () => {
         transformNoticeData(item)
       );
 
-      // 클라이언트에서 정렬
-      const sorted = sortNotices(transformed, sortType);
-
-      setAllNotices(sorted);
+      // 백엔드에서 이미 정렬된 데이터이므로 클라이언트 정렬 불필요
+      setAllNotices(transformed);
       setTotalAllCount(data.count);
     } catch (error) {
       console.error('공고 목록 로딩 실패:', error);
@@ -207,7 +150,7 @@ const NoticeListPage = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [allPage, filterValues, sortType, sortNotices, buildFilterParams]);
+  }, [allPage, filterValues, sortType, buildFilterParams]);
 
   // 검색 결과 불러오기
   const loadSearchResults = useCallback(async () => {
@@ -218,10 +161,14 @@ const NoticeListPage = () => {
 
     setIsLoading(true);
     try {
+      // 백엔드 정렬 파라미터 추가
+      const sortParams = getSortParams(sortType);
+
       const baseParams: FetchNoticeListParams = {
         offset: (searchPage - 1) * ITEMS_PER_PAGE,
         limit: ITEMS_PER_PAGE,
         keyword: searchTerm,
+        ...sortParams, // 백엔드 정렬 파라미터
       };
 
       const filterParams = buildFilterParams(filterValues);
@@ -233,10 +180,8 @@ const NoticeListPage = () => {
         transformNoticeData(item)
       );
 
-      // 클라이언트에서 정렬
-      const sorted = sortNotices(transformed, sortType);
-
-      setSearchResults(sorted);
+      // 백엔드에서 이미 정렬된 데이터이므로 클라이언트 정렬 불필요
+      setSearchResults(transformed);
       setTotalSearchCount(data.count);
     } catch (error) {
       console.error('검색 결과 로딩 실패:', error);
@@ -245,14 +190,7 @@ const NoticeListPage = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [
-    searchTerm,
-    searchPage,
-    filterValues,
-    sortType,
-    sortNotices,
-    buildFilterParams,
-  ]);
+  }, [searchTerm, searchPage, filterValues, sortType, buildFilterParams]);
 
   // 필터 또는 정렬 변경 시 페이지 리셋
   useEffect(() => {
@@ -289,48 +227,6 @@ const NoticeListPage = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* 검색 헤더 영역 */}
-      <div className="border-b border-gray-100 bg-white">
-        <div className="mx-auto max-w-[964px] px-3 py-8 sm:px-8 lg:px-0">
-          <h1 className="mb-4 text-[20px] font-bold text-gray-900 sm:mb-6 sm:text-[24px]">
-            공고 검색
-          </h1>
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <input
-                type="text"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="검색어를 입력하세요"
-                className="focus:ring-opacity-20 h-[46px] w-full rounded-[10px] border border-gray-300 px-4 pr-12 text-sm focus:border-[#FF5C3F] focus:ring-2 focus:ring-[#FF5C3F] focus:outline-none sm:h-[52px] sm:text-base"
-              />
-              {searchInput && (
-                <button
-                  onClick={handleClearSearch}
-                  className="absolute top-1/2 right-4 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  aria-label="검색어 지우기">
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <path
-                      d="M15 5L5 15M5 5L15 15"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
-              )}
-            </div>
-            <button
-              onClick={handleSearch}
-              className="h-[46px] rounded-[10px] bg-[#FF5C3F] px-6 text-sm font-medium whitespace-nowrap text-white transition-colors hover:bg-[#FF4A2D] sm:h-[52px] sm:px-8 sm:text-base">
-              검색
-            </button>
-          </div>
-        </div>
-      </div>
-
       <div className="pb-20">
         {/* 로딩 오버레이 */}
         {isLoading && (
@@ -399,7 +295,16 @@ const NoticeListPage = () => {
                 <>
                   <div className="grid grid-cols-2 gap-3 pb-10 sm:gap-4 lg:grid-cols-3 lg:gap-6">
                     {searchResults.map((notice) => (
-                      <Post key={notice.id} {...notice} />
+                      <Post
+                        key={notice.id}
+                        {...notice}
+                        className="max-w-none"
+                        onClick={() => {
+                          router.push(
+                            `/auth/shops/${notice.shopId}/notices/${notice.id}`
+                          );
+                        }}
+                      />
                     ))}
                   </div>
                   <Pagination
@@ -433,7 +338,15 @@ const NoticeListPage = () => {
                           <div
                             key={notice.id}
                             className="w-[calc(50vw-24px)] flex-shrink-0 sm:w-[calc(50vw-32px)]">
-                            <Post {...notice} />
+                            <Post
+                              {...notice}
+                              className="max-w-none"
+                              onClick={() => {
+                                router.push(
+                                  `/auth/shops/${notice.shopId}/notices/${notice.id}`
+                                );
+                              }}
+                            />
                           </div>
                         ))}
                       </div>
@@ -441,7 +354,16 @@ const NoticeListPage = () => {
                     {/* 데스크탑: 그리드 */}
                     <div className="hidden grid-cols-3 gap-6 lg:grid">
                       {customNotices.map((notice) => (
-                        <Post key={notice.id} {...notice} />
+                        <Post
+                          key={notice.id}
+                          {...notice}
+                          className="max-w-none"
+                          onClick={() => {
+                            router.push(
+                              `/auth/shops/${notice.shopId}/notices/${notice.id}`
+                            );
+                          }}
+                        />
                       ))}
                     </div>
                   </>
@@ -507,7 +429,16 @@ const NoticeListPage = () => {
                 <div className="grid grid-cols-2 gap-3 pb-10 sm:gap-4 lg:grid-cols-3 lg:gap-6">
                   {allNotices.length > 0 ? (
                     allNotices.map((notice) => (
-                      <Post key={notice.id} {...notice} />
+                      <Post
+                        key={notice.id}
+                        {...notice}
+                        className="max-w-none"
+                        onClick={() => {
+                          router.push(
+                            `/auth/shops/${notice.shopId}/notices/${notice.id}`
+                          );
+                        }}
+                      />
                     ))
                   ) : (
                     <div className="col-span-2 py-20 text-center lg:col-span-3">

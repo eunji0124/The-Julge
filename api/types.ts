@@ -11,6 +11,8 @@
  * const response: SignupResponse = await authApi.signup(data);
  */
 
+import type { ShopItem } from './notices';
+
 /**
  * API 공통 타입
  */
@@ -50,11 +52,10 @@ export interface User {
   phone?: string;
   address?: string;
   bio?: string;
-  shop?: { item: { id: string } & ShopRequest };
-}
-export interface UserInfo {
-  item: User;
-  links: ApiLink[];
+  shop: null | {
+    item: ShopItem;
+    href: string;
+  };
 }
 
 /**

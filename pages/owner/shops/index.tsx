@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 
 import Button from '@/components/common/Button';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 const MyShop = () => {
   const [loading, setLoading] = useState(true);
@@ -23,7 +24,7 @@ const MyShop = () => {
     checkAuth();
   }, [router]);
 
-  if (loading) return <div>로딩중...</div>;
+  if (loading) return <LoadingSpinner />;
   if (error) return <div className="text-red-500">{error}</div>;
 
   return (

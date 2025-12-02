@@ -11,12 +11,14 @@ import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
 import AlertModal from '@/components/common/modal/AlertModal';
 import BadgeClose from '@/components/icons/BadgeClose';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 const PostNotice = () => {
   const [hourlyPay, setHourlyPay] = useState('');
   const [startsAt, setStartsAt] = useState('');
   const [workhour, setWorkhour] = useState('');
   const [description, setDescription] = useState('');
+  const [loading, setLoading] = useState(true);
   const [originalPay, setOriginalPay] = useState<number>(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const router = useRouter();
@@ -25,23 +27,22 @@ const PostNotice = () => {
   const [errorModalOpen, setErrorModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // 로그인 체크 및 shopId 확인
+  // 로그인 체크 및 가게 정보 불러오기
   useEffect(() => {
-    const checkAuth = () => {
+    const initializePage = async () => {
+      // 1. 로그인 체크
       const userId = localStorage.getItem('userId');
       if (!userId) {
         router.push('/login');
         return;
       }
-    };
-    checkAuth();
-  }, [router]);
 
-  // 가게 정보 불러오기 (originalHourlyPay 가져오기)
-  useEffect(() => {
-    const fetchShopData = async () => {
-      if (!shopId || typeof shopId !== 'string') return;
+      // 2. shopId 확인
+      if (!shopId || typeof shopId !== 'string') {
+        return;
+      }
 
+      // 3. 가게 정보 불러오기
       try {
         const shopRes = await shops.getShop(shopId);
         if (shopRes?.item?.originalHourlyPay) {
@@ -49,17 +50,26 @@ const PostNotice = () => {
         }
       } catch (error) {
         console.error('가게 정보 불러오기 실패:', error);
+        setErrorMessage('가게 정보를 불러오는데 실패했습니다.');
+        setErrorModalOpen(true);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchShopData();
-  }, [shopId]);
+    initializePage();
+  }, [router, shopId]);
 
-  // shopId가 없으면 로딩 상태 표시
+  // 로딩 중일 때
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
+  // shopId가 없을 때
   if (!shopId) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        로딩중...
+        <p className="text-lg text-gray-600">잘못된 접근입니다.</p>
       </div>
     );
   }

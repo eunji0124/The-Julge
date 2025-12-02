@@ -10,6 +10,7 @@ import PostBanner from '@/components/owner/PostBanner';
 import { transformApplicationData } from '@/lib/utils/transformTableData';
 import { calculatePercentage } from '@/utils/transformNotice';
 import AlertModal from '@/components/common/modal/AlertModal';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 const NoticeDetail = () => {
   const router = useRouter();
@@ -19,7 +20,7 @@ const NoticeDetail = () => {
   >(null);
   const [shop, setShop] = useState<(ShopRequest & { id: string }) | null>(null);
   const [applicationList, setApplicationList] = useState<ApplicationItem[]>([]);
-  const [_loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [_actionLoading, setActionLoading] = useState<string | null>(null);
 
   // 에러 모달 상태
@@ -50,6 +51,7 @@ const NoticeDetail = () => {
     const fetchNotice = async () => {
       try {
         setLoading(true);
+        if (loading) return <LoadingSpinner />;
 
         // 1. 공고 상세 조회
         const noticeRes = await notices.getShopNotice(
@@ -58,6 +60,7 @@ const NoticeDetail = () => {
         );
 
         const noticeData = noticeRes.item;
+
         setNotice({
           id: noticeData.id,
           hourlyPay: noticeData.hourlyPay,
@@ -166,7 +169,8 @@ const NoticeDetail = () => {
       setActionLoading(null);
     }
   };
-
+  // 로딩 중일 때
+  if (loading) return <LoadingSpinner />;
   if (!notice) return <div className="p-6">공고를 찾을 수 없습니다.</div>;
 
   return (

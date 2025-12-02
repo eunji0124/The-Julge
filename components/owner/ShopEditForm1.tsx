@@ -9,6 +9,7 @@ import Button from "@/components/common/Button";
 import ErrorModal from "@/components/common/modal/ErrorModal";
 
 import { getMyShop, updateShop } from "@/api/shopEdit";
+import { uploadImage } from "@/api/uploadImage"; // ⭐ 등록 페이지와 동일한 방식 사용
 
 const ADDRESS_OPTIONS = [
   "서울시 종로구","서울시 중구","서울시 용산구","서울시 성동구","서울시 광진구",
@@ -19,7 +20,7 @@ const ADDRESS_OPTIONS = [
 ];
 
 const CATEGORY_OPTIONS = [
-  "한식", "중식", "일식", "양식", "분식", "카페", "편의점", "기타"
+  "한식","중식","일식","양식","분식","카페","편의점","기타"
 ];
 
 export default function ShopEditForm() {
@@ -42,17 +43,19 @@ export default function ShopEditForm() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // 🔥 기존 가게 정보 불러오기
+  // ⭐ 기존 가게 정보 불러오기
   useEffect(() => {
     async function fetchShop() {
       try {
-        const shop = await getMyShop(); // 서버에서 내 가게 정보 가져오기
+        const shop = await getMyShop();
+
         setName(shop.name);
         setCategory(shop.category);
         setAddress1(shop.address1);
         setAddress2(shop.address2 || "");
         setHourlyPay(String(shop.originalHourlyPay));
         setDescription(shop.description || "");
+
         setImageUrl(shop.imageUrl || "");
         setPreviewUrl(shop.imageUrl || null);
       } catch (e) {
@@ -67,17 +70,25 @@ export default function ShopEditForm() {
 
   if (loading) return <p className="p-10 text-center">불러오는 중...</p>;
 
-  // 🔥 수정 요청
+  // ⭐ 수정 요청
   const handleSubmit = async () => {
     try {
+      let finalImageUrl = imageUrl;
+
+      // ⭐ 이미지 변경이 있었다면 → 업로드 실행
+      if (file) {
+        finalImageUrl = await uploadImage(file);
+        setImageUrl(finalImageUrl);
+      }
+
       await updateShop({
-        name: name,
-        category: category,
-        address1: address1,
-        address2: address2,
+        name,
+        category,
+        address1,
+        address2,
         originalHourlyPay: Number(hourlyPay),
-        description: description,
-        imageUrl: imageUrl || "", // 수정에서도 null 금지
+        description,
+        imageUrl: finalImageUrl, // 변경되든 아니든 최종 이미지 URL 전달
       });
 
       setIsModalOpen(true);
@@ -89,12 +100,11 @@ export default function ShopEditForm() {
 
   return (
     <div className="mx-auto w-full max-w-[820px] pt-24 py-12 px-6 sm:px-8 md:px-0">
-      {/* 제목 */}
       <h2 className="text-xl font-semibold mb-8">가게 정보 편집</h2>
 
       {/* 이름 + 카테고리 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <Input label="가게 이름" placeholder="입력" value={name} onChange={setName} />
+        <Input label="가게 이름" value={name} onChange={setName} />
 
         <div className="relative">
           <Input
@@ -105,6 +115,7 @@ export default function ShopEditForm() {
             onToggleDropdown={() => setIsCategoryOpen(!isCategoryOpen)}
             isDropdownOpen={isCategoryOpen}
           />
+
           {isCategoryOpen && (
             <Dropdown
               items={CATEGORY_OPTIONS}
@@ -130,6 +141,7 @@ export default function ShopEditForm() {
             onToggleDropdown={() => setIsAddressOpen(!isAddressOpen)}
             isDropdownOpen={isAddressOpen}
           />
+
           {isAddressOpen && (
             <Dropdown
               items={ADDRESS_OPTIONS}
@@ -151,7 +163,6 @@ export default function ShopEditForm() {
         <Input
           type="number"
           label="기본 시급"
-          placeholder="10000"
           value={hourlyPay}
           onChange={setHourlyPay}
           unit="원"
@@ -164,10 +175,22 @@ export default function ShopEditForm() {
 
         <div className="flex flex-col items-center justify-center h-[260px] w-full border border-gray-300 rounded-md bg-gray-100 relative overflow-hidden">
           {previewUrl ? (
-            <Image src={previewUrl} alt="preview" width={500} height={260} className="object-cover w-full h-full" />
+            <Image
+              src={previewUrl}
+              alt="preview"
+              width={500}
+              height={260}
+              className="object-cover w-full h-full"
+            />
           ) : (
             <div className="text-gray-500 text-sm flex flex-col items-center">
-              <Image src="/images/camera.png" alt="camera" width={40} height={40} className="opacity-60 mb-2" />
+              <Image
+                src="/images/camera.png"
+                alt="camera"
+                width={40}
+                height={40}
+                className="opacity-60 mb-2"
+              />
               이미지 변경하기
             </div>
           )}
@@ -177,12 +200,12 @@ export default function ShopEditForm() {
             accept="image/*"
             className="absolute inset-0 opacity-0 cursor-pointer"
             onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (!file) return;
-              setFile(file);
-              const url = URL.createObjectURL(file);
-              setPreviewUrl(url);
-              setImageUrl(""); // API는 실제 업로드를 허용하지 않음 → 빈 문자열 보내면 됨
+              const selected = e.target.files?.[0];
+              if (!selected) return;
+
+              setFile(selected);
+              setPreviewUrl(URL.createObjectURL(selected));
+              setImageUrl(""); // 새로 업로드될 이미지라 기존 URL 제거
             }}
           />
         </div>
@@ -192,7 +215,6 @@ export default function ShopEditForm() {
       <div className="mb-10">
         <label className="block mb-2 font-medium">가게 설명</label>
         <textarea
-          placeholder="가게 소개를 입력하세요"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           className="w-full h-[160px] border border-gray-300 rounded-md p-3 resize-none"
@@ -211,7 +233,6 @@ export default function ShopEditForm() {
         </Button>
       </div>
 
-      {/* 🔥 모달: 내용만 변경 */}
       {isModalOpen && (
         <ErrorModal
           message="수정이 완료되었습니다."

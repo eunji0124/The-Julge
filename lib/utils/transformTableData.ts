@@ -1,6 +1,7 @@
 import { ApplicationItem } from '@/api/types';
 import { formatPay } from '@/lib/utils/formatPay';
 import { formatWorkTime } from '@/lib/utils/formatWorkTime';
+
 // 사장님: API 응답 타입 정의
 interface EmployerApiItem {
   item: {

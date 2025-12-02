@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -53,7 +55,7 @@ const NAVIGATION: Record<UserRole, NavItem[]> = {
     { label: '알림', isIcon: true },
   ],
   [UserType.EMPLOYEE]: [
-    { label: '내 프로필', href: '/' },
+    { label: '내 프로필', href: '/staff/profile' },
     { label: '로그아웃', action: 'logout' },
     { label: '알림', isIcon: true },
   ],
@@ -84,6 +86,9 @@ const Header = () => {
 
   const userRole = getUserRole();
 
+  // 검색어 상태
+  const [searchKeyword, setSearchKeyword] = useState('');
+
   /**
    * 로그아웃 처리 함수
    * - 인증 정보 초기화
@@ -92,6 +97,19 @@ const Header = () => {
   const handleLogout = () => {
     clearAuth();
     router.push('/');
+  };
+
+  /**
+   * 검색 처리 함수
+   * - 전체 공고 검색 페이지로 이동하며 검색어를 쿼리 파라미터로 전달
+   */
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (searchKeyword.trim()) {
+      router.push(
+        `/auth/notices?search=${encodeURIComponent(searchKeyword.trim())}`
+      );
+    }
   };
 
   /**
@@ -166,6 +184,7 @@ const Header = () => {
 
         {/* 검색 입력 영역 */}
         <form
+          onSubmit={handleSearchSubmit}
           role="search"
           className="bg-gray-10 col-span-2 col-start-1 row-start-2 mx-auto w-full max-w-[450px] rounded-[10px] sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:mx-auto">
           <div className="flex w-full items-center gap-2 p-2 sm:items-start sm:gap-2.5 sm:p-2.5">
@@ -178,8 +197,10 @@ const Header = () => {
             />
             <input
               type="search"
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
               placeholder="가게 이름으로 찾아보세요"
-              className="text-gray-40 h-5 w-[233px] text-xs leading-4 font-normal focus:border-none focus:outline-none sm:text-sm sm:leading-[22px]"
+              className="text-gray-40 h-5 flex-1 text-xs leading-4 font-normal focus:border-none focus:outline-none sm:text-sm sm:leading-[22px]"
             />
           </div>
         </form>

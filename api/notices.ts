@@ -1,4 +1,5 @@
 import { api } from './client';
+import { ApiLink } from './types';
 
 export interface ShopItem {
   id: string;
@@ -22,6 +23,13 @@ export interface NoticeItem {
     item: ShopItem;
     href: string;
   };
+  currentUserApplication?: {
+    item: {
+      id: string;
+      status: 'pending' | 'accepted' | 'rejected' | 'canceled';
+    };
+    href: string;
+  } | null;
 }
 
 export interface NoticeListResponse {
@@ -32,8 +40,13 @@ export interface NoticeListResponse {
   hasNext: boolean;
   items: {
     item: NoticeItem;
-    links: unknown[];
+    links: ApiLink[];
   }[];
+}
+
+export interface NoticeDetailResponse {
+  item: NoticeItem;
+  links: ApiLink[];
 }
 
 export interface FetchNoticeListParams {
@@ -43,6 +56,28 @@ export interface FetchNoticeListParams {
   keyword?: string;
   startsAtGte?: string;
   hourlyPayGte?: number;
+  // 백엔드 정렬 파라미터 추가
+  sort?: 'time' | 'pay' | 'hour' | 'shop';
+  order?: 'asc' | 'desc';
+}
+
+// 공고 신청 응답 타입
+export interface ApplyNoticeResponse {
+  item: {
+    id: string;
+    status: 'pending' | 'accepted' | 'rejected' | 'canceled';
+    createdAt: string;
+  };
+  links: ApiLink[];
+}
+
+// 공고 신청 취소 응답 타입
+export interface CancelApplicationResponse {
+  item: {
+    id: string;
+    status: 'canceled';
+  };
+  links: ApiLink[];
 }
 
 // 공고 목록 조회
@@ -54,6 +89,8 @@ export async function fetchNoticeList(params: FetchNoticeListParams = {}) {
     keyword,
     startsAtGte,
     hourlyPayGte,
+    sort,
+    order,
   } = params;
 
   const queryParams = new URLSearchParams();
@@ -76,9 +113,54 @@ export async function fetchNoticeList(params: FetchNoticeListParams = {}) {
     queryParams.append('hourlyPayGte', hourlyPayGte.toString());
   }
 
+  // 백엔드 정렬 파라미터 추가
+  if (sort) {
+    queryParams.append('sort', sort);
+  }
+
+  if (order) {
+    queryParams.append('order', order);
+  }
+
   const response = await api.get<NoticeListResponse>(
     `/notices?${queryParams.toString()}`
   );
 
   return response;
 }
+
+// 공고 상세 조회
+export async function fetchNoticeDetail(
+  shopId: string,
+  noticeId: string
+): Promise<NoticeDetailResponse> {
+  const response = await api.get<NoticeDetailResponse>(
+    `/shops/${shopId}/notices/${noticeId}`
+  );
+
+  return response;
+}
+
+// 공고 신청 API
+export const applyNotice = async (
+  shopId: string,
+  noticeId: string
+): Promise<ApplyNoticeResponse> => {
+  const response = await api.post<ApplyNoticeResponse>(
+    `/shops/${shopId}/notices/${noticeId}/applications`
+  );
+  return response;
+};
+
+// 공고 신청 취소 API
+export const cancelApplication = async (
+  shopId: string,
+  noticeId: string,
+  applicationId: string
+): Promise<CancelApplicationResponse> => {
+  const response = await api.put<CancelApplicationResponse>(
+    `/shops/${shopId}/notices/${noticeId}/applications/${applicationId}`,
+    { status: 'canceled' }
+  );
+  return response;
+};

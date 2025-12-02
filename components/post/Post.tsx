@@ -40,7 +40,7 @@ const Post = ({
   return (
     <div
       className={`${postClasses.container()} ${className || ''} cursor-pointer transition-colors duration-200 hover:scale-[1.02] hover:shadow-lg`}
-      onClick={onClick} // 추가
+      onClick={onClick}
       style={{ cursor: onClick ? 'pointer' : 'default' }}>
       {/* 이미지 + 오버레이 */}
       <div className="h-[84px] max-w-[280px] overflow-hidden rounded-lg transition-transform duration-200 hover:brightness-105 sm:h-[160px]">

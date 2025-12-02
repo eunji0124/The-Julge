@@ -5,6 +5,8 @@ import {
   UserInfo,
   UpdateUserRequest,
   UpdateUserResponse,
+  GetApplicationsQuery,
+  UserApplicationsResponse,
 } from './types';
 
 /**
@@ -44,6 +46,25 @@ const users = {
       `/users/${userId}`,
       data
     );
+    return response;
+  },
+
+  /**
+   * 유저의 지원 목록 조회
+   * @param userId - 사용자 ID
+   * @param query - 쿼리 파라미터 (offset, limit)
+   * @returns 지원 목록
+   */
+  getApplications: async (userId: string, query?: GetApplicationsQuery) => {
+    const params = new URLSearchParams();
+    if (query?.offset !== undefined)
+      params.append('offset', String(query.offset));
+    if (query?.limit !== undefined) params.append('limit', String(query.limit));
+
+    const queryString = params.toString();
+    const url = `/users/${userId}/applications${queryString ? `?${queryString}` : ''}`;
+
+    const response = await api.get<UserApplicationsResponse>(url);
     return response;
   },
 };

@@ -184,7 +184,7 @@ const Table = <T extends Record<string, React.ReactNode>>({
         {cols.map((col, idx) => (
           <th
             key={col.key}
-            className={`${getColumnClassName(startIndex + idx)} border-gray-20 items-center border-b px-3 py-[14px] text-left text-[12px] leading-[22px] sm:text-[14px]`}>
+            className={`${getColumnClassName(startIndex + idx)} border-gray-20 items-center border-b px-3 py-3.5 text-left text-[12px] leading-[22px] sm:text-[14px]`}>
             {col.label}
           </th>
         ))}

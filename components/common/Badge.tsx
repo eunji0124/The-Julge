@@ -7,30 +7,31 @@ import { cn } from '@/lib/utils';
 
 /**
  *
- const Ex = () => {
-
- return (
-    <div className="mx-5 my-5 inline-flex gap-4">
-      <Badge>대기중</Badge>
-      <Badge status="accepted">승인됨</Badge>
-      <Badge status="accepted">승인 완료</Badge>
-      <Badge status="rejected">거절</Badge>
-      <Badge status="canceled">취소</Badge>
-      <Badge variant="filter" onRemove={() => console.log('removed')}>
-        서울시 강남구
-      </Badge>
-    </div>
-  );
-};
+ * const Ex = () => {
+ *  return (
+ *   <div className="mx-5 my-5 inline-flex gap-4">
+ *    <Badge>대기중</Badge>
+ *    <Badge status="accepted">승인됨</Badge>
+ *    <Badge status="accepted">승인 완료</Badge>
+ *    <Badge status="rejected">거절</Badge>
+ *    <Badge status="canceled">취소</Badge>
+ *    <Badge status="pending">대기 중</Badge>
+ *    <Badge variant="filter" onRemove={() => console.log('removed')}>
+ *      서울시 강남구
+ *    </Badge>
+ *   </div>
+ *  );
+ *};
  */
 
-export type BadgeStatus = 'accepted' | 'rejected' | 'canceled' | '';
+export type BadgeStatus = 'accepted' | 'rejected' | 'canceled' | 'pending' | '';
 
 // status별 한글 텍스트 매핑
 const STATUS_TEXT: Record<BadgeStatus, string> = {
   accepted: '승인 완료',
   rejected: '거절',
   canceled: '취소',
+  pending: '대기중',
   '': '대기중',
 };
 
@@ -65,7 +66,9 @@ const getVariantFromStatus = (
     case 'rejected':
     case 'canceled':
       return 'danger';
+    case 'pending':
     case '':
+    default:
       return 'primary';
   }
 };

@@ -302,6 +302,35 @@ export interface ApplicationsResponse {
 }
 
 /**
+ * 유저의 지원 목록 조회 응답 (user 정보 제외)
+ */
+export interface UserApplicationItem {
+  id: string;
+  status: 'pending' | 'accepted' | 'rejected' | 'canceled';
+  createdAt: string;
+  shop: {
+    item: { id: string } & ShopRequest;
+    href: string;
+  };
+  notice: {
+    item: { id: string } & NoticeRequest & { closed: boolean };
+    href: string;
+  };
+}
+
+export interface UserApplicationsResponse {
+  offset: number;
+  limit: number;
+  count: number;
+  hasNext: boolean;
+  items: {
+    item: UserApplicationItem;
+    links: ApiLink[];
+  }[];
+  links: ApiLink[];
+}
+
+/**
  * 가게의 특정 공고 지원 승인, 거절 또는 취소
  */
 export interface UpdateApplicationRequest {

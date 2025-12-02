@@ -1,21 +1,5 @@
-{
-  /* <ShopBanner
-category={'카페'}
-name={'도토리 카페'}
-location={'성수동'}
-imageUrl={
-  'https://images.unsplash.com/photo-1464305795204-6f5bbfc7fb81'
-}
-description={
-  '도토리 카페입니다 도토리 카페입니다 도토리 카페입니다 도토리 카페입니다 도토리 카페입니다 도토리 카페입니다 도토리 카페입니다 도토리 카페입니다 도토리 카페입니다 도토리 카페입니다도토리 카페입니다 도토리 카페입니다 v 도토리 카페입니다 도토리 카페입니다 도토리 카페입니다 도토리 카페입니다 도토리 카페입니다 도토리 카페입니다 도토리 카페입니다도토리 카페입니다 도토리 카페입니다 v 도토리 카페입니다 도토리 카페입니다 도토리 카페입니다 도토리 카페입니다 도토리 카페입니다 도토리 카페입니다 도토리 카페입니다도토리 카페입니다 도토리 카페입니다 v 도토리 카페입니다 도토리 카페입니다 도토리 카페입니다 도토리 카페입니다 도토리 카페입니다 도토리 카페입니다 도토리 카페입니다도토리 카페입니다 도토리 카페입니다 v 도토리 카페입니다 도토리 카페입니다 도토리 카페입니다 도토리 카페입니다  도토리 카페입니다 도토리 카페입니다'
-}
-/> */
-}
-
 import Tippy from '@tippyjs/react';
-
 import { postClasses } from '@/lib/utils/postClasses';
-
 import Button from '../common/Button';
 import PostImage from '../post/PostImage';
 import PostLocation from '../post/PostLocation';
@@ -35,6 +19,9 @@ interface ShopBannerProps {
   location: string;
   imageUrl: string;
   description: string;
+  shopId: string;
+  onEditClick?: () => void;
+  onRegisterClick?: () => void;
 }
 
 const ShopBanner = ({
@@ -43,6 +30,9 @@ const ShopBanner = ({
   location,
   imageUrl,
   description,
+  shopId,
+  onEditClick,
+  onRegisterClick,
 }: ShopBannerProps) => {
   return (
     <div className="mx-auto flex w-[964px] gap-6 rounded-[12px] bg-[var(--color-red-10)] p-6 max-[744px]:w-[680px] max-[744px]:flex-col max-[744px]:gap-4 max-[375px]:w-[351px] max-[375px]:gap-3 max-[375px]:p-5">
@@ -98,10 +88,14 @@ const ShopBanner = ({
           <Button
             variant="secondary"
             size={undefined}
+            onClick={onEditClick}
             className="h-full max-w-none flex-1">
             편집하기
           </Button>
-          <Button size={undefined} className="h-full max-w-none flex-1">
+          <Button
+            size={undefined}
+            onClick={onRegisterClick}
+            className="h-full max-w-none flex-1">
             공고 등록하기
           </Button>
         </div>

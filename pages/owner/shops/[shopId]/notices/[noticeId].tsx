@@ -1,14 +1,15 @@
 // pages/owner/notice/[noticeId].tsx
 import { useEffect, useState } from 'react';
-
 import { useRouter } from 'next/router';
-
+import axios from 'axios';
 import applications from '@/api/owner/application';
 import notices from '@/api/owner/notice';
 import { ApplicationItem, NoticeRequest, ShopRequest } from '@/api/types';
 import Table from '@/components/common/Table';
 import PostBanner from '@/components/owner/PostBanner';
 import { transformApplicationData } from '@/lib/utils/transformTableData';
+import { calculatePercentage } from '@/utils/transformNotice';
+import AlertModal from '@/components/common/modal/AlertModal';
 
 const NoticeDetail = () => {
   const router = useRouter();
@@ -21,6 +22,10 @@ const NoticeDetail = () => {
   const [_loading, setLoading] = useState(true);
   const [_actionLoading, setActionLoading] = useState<string | null>(null);
 
+  // 에러 모달 상태
+  const [errorModalOpen, setErrorModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
   const allowedCategories = [
     '한식',
     '중식',
@@ -32,9 +37,11 @@ const NoticeDetail = () => {
     '기타',
   ] as const;
 
-  const category =
-    shop && allowedCategories.includes(shop.category as any)
-      ? (shop.category as (typeof allowedCategories)[number])
+  type Category = (typeof allowedCategories)[number];
+
+  const category: Category =
+    shop && allowedCategories.includes(shop.category as Category)
+      ? (shop.category as Category)
       : '기타';
 
   useEffect(() => {
@@ -80,9 +87,14 @@ const NoticeDetail = () => {
 
           setApplicationList(applicationItems);
         }
-      } catch (error) {
-        console.error('공고 조회 실패:', error);
-        alert('공고를 불러오는데 실패했습니다.');
+      } catch (e) {
+        // Axios 에러 처리
+        if (axios.isAxiosError(e) && e.response?.data?.message) {
+          setErrorMessage(e.response.data.message);
+        } else {
+          setErrorMessage('등록 중 오류가 발생했습니다.');
+        }
+        setErrorModalOpen(true);
       } finally {
         setLoading(false);
       }
@@ -113,11 +125,11 @@ const NoticeDetail = () => {
             : app
         )
       );
-
-      alert('지원을 승인했습니다.');
-    } catch (error) {
-      console.error('승인 실패:', error);
-      alert('승인에 실패했습니다.');
+      setErrorMessage('지원을 승인했습니다.');
+      setErrorModalOpen(true);
+    } catch (e) {
+      setErrorMessage('승인에 실패했습니다.');
+      setErrorModalOpen(true);
     } finally {
       setActionLoading(null);
     }
@@ -145,11 +157,11 @@ const NoticeDetail = () => {
             : app
         )
       );
-
-      alert('지원을 거절했습니다.');
-    } catch (error) {
-      console.error('거절 실패:', error);
-      alert('거절에 실패했습니다.');
+      setErrorMessage('지원을 거절했습니다.');
+      setErrorModalOpen(true);
+    } catch (e) {
+      setErrorMessage('거절에 실패했습니다.');
+      setErrorModalOpen(true);
     } finally {
       setActionLoading(null);
     }
@@ -158,61 +170,73 @@ const NoticeDetail = () => {
   if (!notice) return <div className="p-6">공고를 찾을 수 없습니다.</div>;
 
   return (
-    <div className="mx-auto max-w-[1440px] px-6 pt-6">
-      <div className="mx-auto w-[964px] max-[744px]:w-[680px] max-[375px]:w-[351px]">
-        {shop && (
-          <>
-            <div className="mb-2 text-[16px] max-[375px]:text-[14px]">
-              {category}
-            </div>
-            <div className="mb-4 text-[24px] font-bold max-[375px]:text-[20px]">
-              {shop.name}
-            </div>
-            <div className="mb-8">
-              <PostBanner
-                name={shop.name}
-                location={shop.address1}
-                imageUrl={shop.imageUrl}
-                description={shop.description}
-                startAt={notice.startsAt}
-                workTime={notice.workhour}
-                wage={notice.hourlyPay}
-              />
-            </div>
-
-            {/* 공고 설명 */}
-            <div className="bg-gray-10 mb-8 flex flex-col gap-8 rounded-xl p-8 max-[744px]:p-8 max-[375px]:p-5">
-              <div className="text-[16px] leading-5 font-bold text-black max-[375px]:text-[14px]">
-                공고 설명
+    <>
+      <div className="mx-auto max-w-[1440px] px-6 pt-6">
+        <div className="mx-auto w-[964px] max-[744px]:w-[680px] max-[375px]:w-[351px]">
+          {shop && (
+            <>
+              <div className="mb-2 text-[16px] leading-5 font-bold text-red-50 max-[375px]:text-[14px]">
+                {category}
               </div>
-              <div className="text-[16px] leading-[26px] font-normal text-black max-[375px]:text-[14px] max-[375px]:leading-[22px]">
-                {notice.description}
+              <div className="mb-4 text-[24px] font-bold max-[375px]:text-[20px]">
+                {shop.name}
               </div>
-            </div>
-
-            {/* 신청자 목록 */}
-            <div className="mb-4">
-              <div className="mb-2 text-[18px] font-semibold max-[375px]:text-[16px]">
-                신청자 목록
-              </div>
-              <div>
-                <Table
-                  data={transformApplicationData(applicationList).map(
-                    (item) => ({
-                      ...item,
-                      status: item.status === 'pending' ? '' : item.status,
-                    })
+              <div className="mb-8">
+                <PostBanner
+                  name={shop.name}
+                  location={shop.address1}
+                  imageUrl={shop.imageUrl}
+                  description={shop.description}
+                  startAt={notice.startsAt}
+                  workTime={notice.workhour}
+                  wage={notice.hourlyPay}
+                  percentage={calculatePercentage(
+                    notice.hourlyPay,
+                    shop.originalHourlyPay
                   )}
-                  rowKey="id"
-                  onApprove={handleApprove}
-                  onReject={handleReject}
                 />
               </div>
-            </div>
-          </>
-        )}
+
+              {/* 공고 설명 */}
+              <div className="bg-gray-10 mb-8 flex flex-col gap-8 rounded-xl p-8 max-[744px]:p-8 max-[375px]:p-5">
+                <div className="text-[16px] leading-5 font-bold text-black max-[375px]:text-[14px]">
+                  공고 설명
+                </div>
+                <div className="text-[16px] leading-[26px] font-normal text-black max-[375px]:text-[14px] max-[375px]:leading-[22px]">
+                  {notice.description}
+                </div>
+              </div>
+
+              {/* 신청자 목록 */}
+              <div className="mb-4">
+                <div className="mb-2 text-[18px] font-semibold max-[375px]:text-[16px]">
+                  신청자 목록
+                </div>
+                <div className="mb-15">
+                  <Table
+                    data={transformApplicationData(applicationList).map(
+                      (item) => ({
+                        ...item,
+                        status: item.status === 'pending' ? '' : item.status,
+                      })
+                    )}
+                    rowKey="id"
+                    onApprove={handleApprove}
+                    onReject={handleReject}
+                  />
+                </div>
+              </div>
+            </>
+          )}
+        </div>
       </div>
-    </div>
+      {/* 에러 모달 */}
+      <AlertModal
+        isOpen={errorModalOpen}
+        message={errorMessage}
+        onClose={() => setErrorModalOpen(false)}
+      />
+    </>
   );
 };
 

@@ -41,4 +41,15 @@ export const transformNoticeData = (notice: NoticeItem): TransformedNotice => {
     percentage,
     description: notice.description,
   };
+}
+
+export const calculatePercentage = (
+  currentPay: number,
+  originalPay: number
+): number | undefined => {
+  if (!originalPay || originalPay <= 0) return undefined;
+  const percentage = Math.round(
+    ((currentPay - originalPay) / originalPay) * 100
+  );
+  return percentage > 0 ? percentage : undefined;
 };

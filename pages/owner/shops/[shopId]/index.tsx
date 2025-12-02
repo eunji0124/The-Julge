@@ -9,6 +9,7 @@ import users from '@/api/users';
 import Button from '@/components/common/Button';
 import ShopBanner from '@/components/owner/ShopBanner';
 import Post from '@/components/post/Post';
+import { calculatePercentage } from '@/utils/transformNotice';
 
 const MyShop = () => {
   const [shop, setShop] = useState<({ id: string } & ShopRequest) | null>(null);
@@ -17,6 +18,7 @@ const MyShop = () => {
   const router = useRouter();
   type ShopNoticeItem = { id: string } & NoticeRequest & { closed: boolean };
   const [notices, setNotices] = useState<ShopNoticeItem[]>([]);
+
   const allowedCategories = [
     '한식',
     '중식',
@@ -35,11 +37,22 @@ const MyShop = () => {
       ? (shop.category as Category)
       : '기타';
 
+  // 로그인 체크
+  useEffect(() => {
+    const checkAuth = () => {
+      const userId = localStorage.getItem('userId');
+      if (!userId) {
+        router.push('/login');
+      }
+    };
+    checkAuth();
+  }, [router]);
+
   useEffect(() => {
     const fetchShopAndNotices = async () => {
       try {
         const userId = localStorage.getItem('userId');
-        // const userId = 'cfe001f7-5085-4fa9-bb0a-506ed86ebfd7'; 테스트 코드
+
         if (!userId) {
           setError('로그인이 필요합니다.');
           return;
@@ -75,6 +88,12 @@ const MyShop = () => {
   const handlePostClick = (shopId: string, noticeId: string) => {
     router.push(`/owner/shops/${shopId}/notices/${noticeId}`);
   };
+
+  const handleRegisterNotice = () => {
+    if (!shop) return;
+    router.push(`/owner/shops/${shop.id}/notice`);
+  };
+
   if (loading) return <div>로딩중...</div>;
   if (error) return <div className="text-red-500">{error}</div>;
 
@@ -97,13 +116,18 @@ const MyShop = () => {
           )}
 
           {!loading && !error && shop && (
-            <ShopBanner
-              category={category}
-              name={shop.name}
-              location={shop.address1}
-              imageUrl={shop.imageUrl}
-              description={shop.description}
-            />
+            <>
+              <ShopBanner
+                category={category}
+                name={shop.name}
+                location={shop.address1}
+                imageUrl={shop.imageUrl}
+                description={shop.description}
+                shopId={shop.id}
+                onEditClick={() => router.push(`/owner/shops/${shop.id}/edit`)}
+                onRegisterClick={handleRegisterNotice}
+              />
+            </>
           )}
         </div>
       </div>
@@ -115,7 +139,7 @@ const MyShop = () => {
             </h2>
 
             {!loading && !error && notices && (
-              <div className="grid grid-cols-3 gap-6 max-[744px]:grid-cols-2 max-[375px]:grid-cols-1">
+              <div className="mb-25 grid grid-cols-3 gap-6 max-[744px]:grid-cols-2 max-[375px]:grid-cols-1">
                 {notices.length > 0 ? (
                   notices.map((notice) => (
                     <Post
@@ -128,6 +152,10 @@ const MyShop = () => {
                       onClick={() => handlePostClick(shop.id, notice.id)}
                       imageUrl={shop.imageUrl}
                       isActive={!notice.closed}
+                      percentage={calculatePercentage(
+                        notice.hourlyPay,
+                        shop.originalHourlyPay
+                      )}
                     />
                   ))
                 ) : (
@@ -137,7 +165,9 @@ const MyShop = () => {
                     </div>
 
                     <div className="h-[47px] w-[346px] max-[375px]:h-[37px] max-[375px]:w-[108px]">
-                      <Button className="h-full w-full max-w-none!">
+                      <Button
+                        onClick={handleRegisterNotice}
+                        className="h-full w-full max-w-none">
                         공고 등록하기
                       </Button>
                     </div>

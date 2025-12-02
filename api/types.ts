@@ -170,10 +170,6 @@ export interface ShopResponse {
 }
 
 /**
- * 공고
- */
-
-/**
  * 공고 조회
  */
 export interface GetNoticesQuery {
@@ -199,9 +195,14 @@ export interface NoticeResponse {
   address: string[];
   keyword?: string;
   items: {
-    item: { id: string } & NoticeRequest & {
-        shop: { item: ShopRequest; href: string };
-      };
+    item: { id: string } & {
+      hourlyPay: number;
+      startsAt: string; // 양식: 2023-12-23T00:00:00Z
+      workhour: number;
+      description: string;
+    } & {
+      shop: { item: ShopRequest; href: string };
+    };
     links?: ApiLink[];
   }[];
   links?: ApiLink[];
@@ -220,7 +221,12 @@ export interface ShopNoticesResponse {
   count: number; // 전체 개수
   hasNext: boolean; // 다음 내용 존재 여부
   items: {
-    item: { id: string } & NoticeRequest & { closed: boolean };
+    item: { id: string } & {
+      hourlyPay: number;
+      startsAt: string; // 양식: 2023-12-23T00:00:00Z
+      workhour: number;
+      description: string;
+    } & { closed: boolean };
     links: ApiLink[];
   }[];
   links: ApiLink[];
@@ -229,7 +235,6 @@ export interface ShopNoticesResponse {
 /**
  * 가게의 공고 등록
  */
-
 export interface ShopNoticeResponse {
   item: {
     id: string;
@@ -262,7 +267,6 @@ export interface ShopNoticeDetailResponse {
 /**
  * 가게의 특정 공고의 지원 목록 조회
  */
-
 export interface GetApplicationsQuery {
   offset?: number; // 조회 시작 기준
   limit?: number; // 조회 개수
@@ -289,7 +293,6 @@ export interface ApplicationItem {
 /**
  *  유저의 지원 목록
  */
-
 export interface ApplicationsResponse {
   offset: number;
   limit: number;

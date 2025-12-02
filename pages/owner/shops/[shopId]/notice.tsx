@@ -6,6 +6,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 
 import noticesApi from '@/api/owner/notice';
+import shops from '@/api/owner/shop';
 import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
 import AlertModal from '@/components/common/modal/AlertModal';
@@ -16,6 +17,7 @@ const PostNotice = () => {
   const [startsAt, setStartsAt] = useState('');
   const [workhour, setWorkhour] = useState('');
   const [description, setDescription] = useState('');
+  const [originalPay, setOriginalPay] = useState<number>(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const router = useRouter();
   const { shopId } = router.query;
@@ -34,6 +36,24 @@ const PostNotice = () => {
     };
     checkAuth();
   }, [router]);
+
+  // 가게 정보 불러오기 (originalHourlyPay 가져오기)
+  useEffect(() => {
+    const fetchShopData = async () => {
+      if (!shopId || typeof shopId !== 'string') return;
+
+      try {
+        const shopRes = await shops.getShop(shopId);
+        if (shopRes?.item?.originalHourlyPay) {
+          setOriginalPay(shopRes.item.originalHourlyPay);
+        }
+      } catch (error) {
+        console.error('가게 정보 불러오기 실패:', error);
+      }
+    };
+
+    fetchShopData();
+  }, [shopId]);
 
   // shopId가 없으면 로딩 상태 표시
   if (!shopId) {
@@ -70,12 +90,35 @@ const PostNotice = () => {
     return `${date}T${time}:00.000Z`;
   };
 
+  // 시급 변동폭 검증 (100% 미만 = 3자리수 미만)
+  const validateHourlyPayPercentage = (
+    currentPay: number,
+    basePay: number
+  ): boolean => {
+    if (basePay <= 0) return true; // 기준 시급이 없으면 통과
+
+    const percentage = Math.abs(((currentPay - basePay) / basePay) * 100);
+
+    return percentage < 100; // 100% 미만이면 true (통과)
+  };
+
   const handleSubmit = async () => {
     if (!hourlyPay || !startsAt || !workhour) {
       setErrorMessage('필수 항목을 모두 입력해주세요.');
       setErrorModalOpen(true);
       return;
     }
+
+    // 시급 변동폭 검증
+    const currentPay = Number(hourlyPay);
+    if (!validateHourlyPayPercentage(currentPay, originalPay)) {
+      setErrorMessage(
+        `시급은 기준 시급(${originalPay.toLocaleString()}원)의 ±100% 미만으로 설정해주세요.`
+      );
+      setErrorModalOpen(true);
+      return;
+    }
+
     // 날짜 형식 검증
     const datePattern = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/;
     if (!datePattern.test(startsAt)) {
@@ -132,6 +175,11 @@ const PostNotice = () => {
               unit="원"
               placeholder="시급을 입력하세요"
             />
+            {originalPay > 0 && (
+              <p className="mt-1 text-xs text-gray-500">
+                기준 시급: {originalPay.toLocaleString()}원
+              </p>
+            )}
           </div>
           <div className="w-full">
             <Input

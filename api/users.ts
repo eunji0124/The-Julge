@@ -27,8 +27,8 @@ const users = {
     const response = await api.post<SignupResponse>('/users', data);
     return response;
   },
-  getUser: async (user_id: string) => {
-    return await api.get<{ item: User }>(`/users/${user_id}`);
+  getUser: (userId: string) => {
+    return api.get<{ item: User }>(`/users/${userId}`);
   },
   /**
    * 사용자 정보 조회

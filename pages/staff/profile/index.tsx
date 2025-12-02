@@ -1,11 +1,8 @@
-import { useEffect, useState } from 'react';
-
-import { UserApplicationsResponse } from '@/api/types';
-import users from '@/api/users';
 import Table from '@/components/common/Table';
 import EmptyProfileState from '@/components/profile/EmptyProfileState';
 import UserProfileCard from '@/components/profile/UserProfileCard';
 import { useAuthRedirect } from '@/hooks/useAuthRedirect';
+import { useUserApplications } from '@/hooks/useUserApplications';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { transformEmployeeData } from '@/lib/utils/transformTableData';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -66,45 +63,21 @@ const Profile = () => {
   // 인증 체크: 로그인하지 않은 경우 /login으로 리다이렉트
   const { isAuthenticated } = useAuthRedirect('/login');
 
-  // 지원 목록 상태 관리
-  const [applications, setApplications] =
-    useState<UserApplicationsResponse | null>(null);
-  const [applicationsLoading, setApplicationsLoading] = useState(false);
-  const [applicationsError, setApplicationsError] = useState<string | null>(
-    null
-  );
-
   // Zustand에서 user 정보 가져오기
   const { user } = useAuthStore();
 
   // 프로필 데이터 조회
   const { profile, isLoading, error } = useUserProfile();
 
-  // 프로필이 있고 user.id가 있을 때 지원 목록 조회
-  useEffect(() => {
-    const fetchApplications = async () => {
-      if (!profile || !user?.id) return;
-
-      setApplicationsLoading(true);
-      setApplicationsError(null);
-
-      try {
-        const response = await users.getApplications(user.id, {
-          offset: 0,
-          limit: 10,
-        });
-        setApplications(response);
-      } catch (err) {
-        setApplicationsError(
-          err instanceof Error ? err.message : '지원 목록 조회 실패'
-        );
-      } finally {
-        setApplicationsLoading(false);
-      }
-    };
-
-    fetchApplications();
-  }, [profile, user?.id]);
+  // 지원 목록 조회 - 프로필이 있을 때만 활성화
+  const {
+    applications,
+    isLoading: applicationsLoading,
+    error: applicationsError,
+  } = useUserApplications({
+    userId: user?.id,
+    enabled: !!profile, // 프로필이 있을 때만 지원 목록 조회
+  });
 
   /**
    * 프로필 상태에 따른 콘텐츠를 반환하는 함수
@@ -143,10 +116,9 @@ const Profile = () => {
   };
 
   /**
-  /**
-   * 프로필 상태에 따른 콘텐츠를 반환하는 함수
+   * 지원 목록 상태에 따른 콘텐츠를 반환하는 함수
    *
-   * @returns 프로필 데이터, 로딩 상태, 에러 상태에 따른 React 노드
+   * @returns 지원 목록 데이터, 로딩 상태, 에러 상태에 따른 React 노드
    */
   const getApplicationsContent = (): React.ReactNode => {
     // 데이터가 있고 items가 있을 때 - Table 컴포넌트로 표시

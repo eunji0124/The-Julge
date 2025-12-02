@@ -1,83 +1,135 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import Image from "next/image";
+import { useState } from 'react';
 
-import Input from "@/components/common/Input";
-import Dropdown from "@/components/common/Dropdown";
-import Button from "@/components/common/Button";
-import ErrorModal from "@/components/common/modal/ErrorModal";
+import Image from 'next/image';
 
-import { registerShop } from "@/api/shopRegister";
+import { registerShop } from '@/api/shopRegister';
+import { getPresignedUrl } from '@/api/uploadImage'; // ⭐ presigned URL 요청 API 추가
+import Button from '@/components/common/Button';
+import Dropdown from '@/components/common/Dropdown';
+import Input from '@/components/common/Input';
+import ErrorModal from '@/components/common/modal/ErrorModal';
 
 const ADDRESS_OPTIONS = [
-  "서울시 종로구","서울시 중구","서울시 용산구","서울시 성동구","서울시 광진구",
-  "서울시 동대문구","서울시 중랑구","서울시 성북구","서울시 강북구","서울시 도봉구",
-  "서울시 노원구","서울시 은평구","서울시 서대문구","서울시 마포구","서울시 양천구",
-  "서울시 강서구","서울시 구로구","서울시 금천구","서울시 영등포구","서울시 동작구",
-  "서울시 관악구","서울시 서초구","서울시 강남구","서울시 송파구","서울시 강동구",
+  '서울시 종로구',
+  '서울시 중구',
+  '서울시 용산구',
+  '서울시 성동구',
+  '서울시 광진구',
+  '서울시 동대문구',
+  '서울시 중랑구',
+  '서울시 성북구',
+  '서울시 강북구',
+  '서울시 도봉구',
+  '서울시 노원구',
+  '서울시 은평구',
+  '서울시 서대문구',
+  '서울시 마포구',
+  '서울시 양천구',
+  '서울시 강서구',
+  '서울시 구로구',
+  '서울시 금천구',
+  '서울시 영등포구',
+  '서울시 동작구',
+  '서울시 관악구',
+  '서울시 서초구',
+  '서울시 강남구',
+  '서울시 송파구',
+  '서울시 강동구',
 ];
 
-const CATEGORY_OPTIONS = ["한식", "중식", "일식", "양식", "분식", "카페", "편의점", "기타"];
-
-const SAMPLE_IMAGES = [
-  "/sample-images/dog1.jpg",
-  "/sample-images/dog2.jpg",
-  "/sample-images/dog3.jpg",
-  "/sample-images/dog4.jpg",
-  "/sample-images/dog5.jpg",
-  "/sample-images/dog6.jpg",
+const CATEGORY_OPTIONS = [
+  '한식',
+  '중식',
+  '일식',
+  '양식',
+  '분식',
+  '카페',
+  '편의점',
+  '기타',
 ];
 
 const ShopRegisterForm = () => {
-  const [name, setName] = useState("");
-  const [category, setCategory] = useState("");
-  const [address1, setAddress1] = useState("");
-  const [address2, setAddress2] = useState("");
-  const [hourlyPay, setHourlyPay] = useState("");
-  const [description, setDescription] = useState("");
+  const [name, setName] = useState('');
+  const [category, setCategory] = useState('');
+  const [address1, setAddress1] = useState('');
+  const [address2, setAddress2] = useState('');
+  const [hourlyPay, setHourlyPay] = useState('');
+  const [description, setDescription] = useState('');
 
-  // Null 금지! → 기본값은 ""로 유지
+  // 이미지 관련
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [imageUrl, setImageUrl] = useState<string>(""); // 🔥 null 절대 안 됨
-
+  const [imageUrl, setImageUrl] = useState<string>('');
   const [file, setFile] = useState<File | null>(null);
 
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isAddressOpen, setIsAddressOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // ⭐ S3 업로드 함수
+  const uploadImageToS3 = async () => {
+    if (!file) return '';
+
+    // 1) presigned URL 발급
+    const presigned = await getPresignedUrl(file.name, file.type);
+
+    // 2) S3로 업로드 (PUT 요청)
+    await fetch(presigned.uploadUrl, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': file.type,
+      },
+      body: file,
+    });
+
+    // 3) S3 접근 URL 반환
+    return presigned.fileUrl;
+  };
+
   const handleSubmit = async () => {
     if (!name || !category || !address1 || !hourlyPay) {
-      alert("필수 항목을 입력해주세요.");
+      alert('필수 항목을 입력해주세요.');
       return;
     }
 
     try {
-      await registerShop({
-        name: name,
-        category: category,
-        address1: address1,
-        address2: address2 || "",
-        description: description || "",
-        originalHourlyPay: Number(hourlyPay), 
+      let uploadedImageUrl = imageUrl;
 
-        // 이미지 넣는게 안돼서 이렇게 하니깐 들어가짐
-        imageUrl: imageUrl || "",
+      // ⭐ 이미지 선택된 경우 → S3 업로드
+      if (file) {
+        uploadedImageUrl = await uploadImageToS3();
+        setImageUrl(uploadedImageUrl);
+      }
+
+      // ⭐ 최종 가게 등록 API 호출
+      await registerShop({
+        name,
+        category,
+        address1,
+        address2: address2 || '',
+        description: description || '',
+        originalHourlyPay: Number(hourlyPay),
+        imageUrl: uploadedImageUrl, // S3 URL 저장
       });
 
       setIsModalOpen(true);
     } catch (err) {
-      console.error("가게등록 오류:", err);
+      console.error('가게등록 오류:', err);
       setIsModalOpen(true);
     }
   };
 
   return (
-    <div className="mx-auto w-full max-w-[820px] pt-24 py-12 px-6 sm:px-8 md:px-0">
+    <div className="mx-auto w-full max-w-[820px] px-6 py-12 pt-24 sm:px-8 md:px-0">
       {/* 이름 + 카테고리 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <Input label="가게 이름" placeholder="입력" value={name} onChange={setName} />
+      <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
+        <Input
+          label="가게 이름"
+          placeholder="입력"
+          value={name}
+          onChange={setName}
+        />
 
         <div className="relative">
           <Input
@@ -103,7 +155,7 @@ const ShopRegisterForm = () => {
       </div>
 
       {/* 주소 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
         <div className="relative">
           <Input
             type="select"
@@ -126,11 +178,16 @@ const ShopRegisterForm = () => {
           )}
         </div>
 
-        <Input label="상세 주소" placeholder="입력" value={address2} onChange={setAddress2} />
+        <Input
+          label="상세 주소"
+          placeholder="입력"
+          value={address2}
+          onChange={setAddress2}
+        />
       </div>
 
       {/* 시급 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
         <Input
           type="number"
           label="기본 시급"
@@ -142,45 +199,55 @@ const ShopRegisterForm = () => {
       </div>
 
       {/* 이미지 업로드 */}
-      {/* 이미지 업로드 대신 → 이미지 선택 UI */}
-<div className="mb-8">
-  <p className="mb-2 font-medium">가게 이미지 선택</p>
+      <div className="mb-8">
+        <p className="mb-2 font-medium">가게 이미지</p>
 
-  {/* 선택된 이미지 미리보기 */}
-  <div className="flex flex-col items-center justify-center h-[260px] w-full border border-gray-300 rounded-md bg-gray-100 relative overflow-hidden">
-    {imageUrl ? (
-      <img src={imageUrl} alt="preview" className="object-cover w-full h-full" />
-    ) : (
-      <div className="text-gray-500 text-sm flex flex-col items-center">
-        <Image src="/images/camera.png" alt="camera" width={40} height={40} className="opacity-60 mb-2" />
-        아래에서 이미지를 선택하세요
+        <div className="relative flex h-[260px] w-full flex-col items-center justify-center overflow-hidden rounded-md border border-gray-300 bg-gray-100">
+          {previewUrl ? (
+            <Image
+              src={previewUrl}
+              alt="preview"
+              width={500}
+              height={260}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="flex flex-col items-center text-sm text-gray-500">
+              <Image
+                src="/images/camera.png"
+                alt="camera"
+                width={40}
+                height={40}
+                className="mb-2 opacity-60"
+              />
+              이미지 추가하기
+            </div>
+          )}
+
+          <input
+            type="file"
+            accept="image/*"
+            className="absolute inset-0 cursor-pointer opacity-0"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (!f) return;
+
+              setFile(f);
+              setPreviewUrl(URL.createObjectURL(f));
+              setImageUrl('');
+            }}
+          />
+        </div>
       </div>
-    )}
-  </div>
-
-  {/* 이미지 선택 그리드 */}
-  <div className="grid grid-cols-4 gap-3 mt-4">
-    {SAMPLE_IMAGES.map((img) => (
-      <img
-        key={img}
-        src={img}
-        className={`w-full h-20 object-cover rounded cursor-pointer border
-          ${imageUrl === img ? "border-blue-500 ring-2 ring-blue-400" : "border-gray-300"}`}
-        onClick={() => setImageUrl(img)}   // 💥 핵심: URL 저장
-      />
-    ))}
-  </div>
-</div>
-
 
       {/* 설명 */}
       <div className="mb-10">
-        <label className="block mb-2 font-medium">가게 설명</label>
+        <label className="mb-2 block font-medium">가게 설명</label>
         <textarea
           placeholder="가게 소개를 입력하세요"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full h-[160px] border border-gray-300 rounded-md p-3 resize-none"
+          className="h-[160px] w-full resize-none rounded-md border border-gray-300 p-3"
         />
       </div>
 
@@ -189,9 +256,8 @@ const ShopRegisterForm = () => {
         <Button
           variant="primary"
           size="large"
-          className="!max-w-[250px] !h-[50px] text-white text-lg"
-          onClick={handleSubmit}
-        >
+          className="!h-[50px] !max-w-[250px] text-lg text-white"
+          onClick={handleSubmit}>
           등록하기
         </Button>
       </div>
@@ -201,7 +267,7 @@ const ShopRegisterForm = () => {
           message="등록이 완료되었습니다."
           onClose={() => {
             setIsModalOpen(false);
-            window.location.href = "/owner/my-shop";
+            window.location.href = '/owner/my-shop';
           }}
         />
       )}

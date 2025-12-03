@@ -13,7 +13,7 @@ export interface TransformedNotice {
   wage: number;
   imageUrl: string;
   isActive: boolean;
-  percentage: number;
+  percentage?: number;
   description?: string;
 }
 
@@ -23,11 +23,16 @@ export interface TransformedNotice {
 export const transformNoticeData = (notice: NoticeItem): TransformedNotice => {
   const originalPay = notice.shop.item.originalHourlyPay;
   const currentPay = notice.hourlyPay;
-  const percentage =
-    originalPay > 0
-      ? Math.round(((currentPay - originalPay) / originalPay) * 100)
-      : 0;
+  let percentage: number | undefined = undefined;
 
+  if (originalPay > 0) {
+    const diff = Math.round(((currentPay - originalPay) / originalPay) * 100);
+
+    // 인상률이 양수일 때만 노출
+    if (diff > 0) {
+      percentage = diff;
+    }
+  }
   return {
     id: notice.id,
     shopId: notice.shop.item.id,
@@ -48,8 +53,8 @@ export const calculatePercentage = (
   originalPay: number
 ): number | undefined => {
   if (!originalPay || originalPay <= 0) return undefined;
-  const percentage = Math.round(
-    ((currentPay - originalPay) / originalPay) * 100
-  );
-  return percentage > 0 ? percentage : undefined;
+
+  const diff = Math.round(((currentPay - originalPay) / originalPay) * 100);
+
+  return diff > 0 ? diff : undefined;
 };

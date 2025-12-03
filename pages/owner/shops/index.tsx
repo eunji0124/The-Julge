@@ -91,7 +91,7 @@ const MyShop = () => {
 
   const handleRegisterNotice = () => {
     if (!shop) return;
-    router.push(`/owner/notices?shopId=$${shop.id}`);
+    router.push(`/owner/notices?shopId=${shop.id}`);
   };
 
   // 인증되지 않았을 때
@@ -124,7 +124,7 @@ const MyShop = () => {
                 내 가게를 소개하고 공고도 등록해보세요.
               </p>
               <Button
-                onClick={() => router.push('/owner/shops/mange')}
+                onClick={() => router.push('/owner/shops/manage')}
                 className="h-[37px] w-full max-w-[346px] sm:h-[47px]">
                 가게 등록하기
               </Button>

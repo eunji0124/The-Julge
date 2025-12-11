@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 import alert from '@/apis/alert';
 import { useIsEmployee } from '@/hooks/useCheckUserType';
@@ -71,11 +71,10 @@ export const useNotifications = (options: UseNotificationsOptions = {}) => {
   // 읽지 않은 알림 존재 여부
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
 
-  // 알림 조회 로딩 상태
-  const [isLoading, setIsLoading] = useState(false);
-
   // 알림 조회 에러 상태
   const [error, setError] = useState<Error | null>(null);
+
+  const isLoadingRef = useRef(false);
 
   /**
    * 서버에서 알림 데이터를 조회하고 상태를 업데이트합니다.
@@ -93,9 +92,9 @@ export const useNotifications = (options: UseNotificationsOptions = {}) => {
    */
   const fetchNotifications = useCallback(async () => {
     // 조건 체크: 기능 비활성화, 직원 아님, 사용자 ID 없음, 로딩 중
-    if (!enabled || !isEmployee || !user?.id || isLoading) return;
+    if (!enabled || !isEmployee || !user?.id || isLoadingRef.current) return;
 
-    setIsLoading(true);
+    isLoadingRef.current = true;
     setError(null);
 
     try {
@@ -135,9 +134,9 @@ export const useNotifications = (options: UseNotificationsOptions = {}) => {
       setError(error);
       console.error('알림 조회 실패:', error);
     } finally {
-      setIsLoading(false);
+      isLoadingRef.current = false;
     }
-  }, [enabled, isEmployee, user?.id, isLoading]);
+  }, [enabled, isEmployee, user?.id]);
 
   /**
    * 직원 사용자일 때 주기적으로 알림 데이터를 조회합니다.
@@ -157,7 +156,7 @@ export const useNotifications = (options: UseNotificationsOptions = {}) => {
 
     // cleanup: 컴포넌트 언마운트 시 인터벌 제거
     return () => clearInterval(intervalId);
-  }, [enabled, isEmployee, user?.id, pollingInterval, fetchNotifications]);
+  }, [enabled, isEmployee, user?.id, pollingInterval]);
 
   /**
    * 알림을 읽음 처리하고 알림 목록을 다시 조회합니다.
@@ -204,7 +203,7 @@ export const useNotifications = (options: UseNotificationsOptions = {}) => {
     isNotificationOpen, // Modal 열림/닫힘 상태
     notifications, // 알림 목록
     hasUnreadNotifications, // 읽지 않은 알림 존재 여부
-    isLoading, // 로딩 상태
+    isLoading: isLoadingRef.current, // 로딩 상태
     error, // 에러 상태
 
     // 액션
@@ -213,5 +212,131 @@ export const useNotifications = (options: UseNotificationsOptions = {}) => {
     openNotification, // Modal 열기
     fetchNotifications, // 수동 새로고침 (필요시 사용)
     markAsRead, // 알림 읽음 처리
+  };
+};
+
+// ============================================
+// 더 나은 방법: 페이지 가시성 고려한 버전 (선택사항)
+// ============================================
+export const useSmartNotifications = (
+  options: UseNotificationsOptions = {}
+) => {
+  const { pollingInterval = 60000, enabled = true } = options;
+
+  const { user } = useAuthStore();
+  const isEmployee = useIsEmployee();
+
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [isPageVisible, setIsPageVisible] = useState(true);
+
+  const isLoadingRef = useRef(false);
+
+  // 페이지 가시성 감지
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      setIsPageVisible(!document.hidden);
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
+  const fetchNotifications = useCallback(async () => {
+    if (!enabled || !isEmployee || !user?.id || isLoadingRef.current) return;
+
+    isLoadingRef.current = true;
+    setError(null);
+
+    try {
+      const response = await alert.getAlerts(user.id);
+
+      const formattedNotifications = response.items
+        .filter((alertItem) => {
+          const status = alertItem.item.result;
+          return status === 'accepted' || status === 'rejected';
+        })
+        .map((alertItem) => ({
+          id: alertItem.item.id,
+          shopName: alertItem.item.shop.item.name,
+          status: alertItem.item.result,
+          time: getWorkTime(
+            alertItem.item.notice.item.startsAt,
+            alertItem.item.notice.item.workhour
+          ),
+          read: alertItem.item.read,
+        }));
+
+      setNotifications(formattedNotifications);
+
+      const hasUnread = response.items.some(
+        (alertItem) => !alertItem.item.read
+      );
+      setHasUnreadNotifications(hasUnread);
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('알림 조회 실패');
+      setError(error);
+      console.error('알림 조회 실패:', error);
+    } finally {
+      isLoadingRef.current = false;
+    }
+  }, [enabled, isEmployee, user?.id]);
+
+  // 페이지가 보이는 경우에만 폴링
+  useEffect(() => {
+    if (!enabled || !isEmployee || !user?.id || !isPageVisible) return;
+
+    fetchNotifications();
+
+    const intervalId = setInterval(fetchNotifications, pollingInterval);
+
+    return () => clearInterval(intervalId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled, isEmployee, user?.id, pollingInterval, isPageVisible]);
+
+  const markAsRead = useCallback(
+    async (notificationId: string) => {
+      if (!user?.id) return;
+
+      try {
+        await alert.readAlert(user?.id, notificationId);
+        await fetchNotifications();
+      } catch (err) {
+        const error =
+          err instanceof Error ? err : new Error('알림 읽음 처리 실패');
+        console.error('알림 읽음 처리 실패:', error);
+        setError(error);
+      }
+    },
+    [user?.id, fetchNotifications]
+  );
+
+  const toggleNotification = useCallback(() => {
+    setIsNotificationOpen((prev) => !prev);
+  }, []);
+
+  const closeNotification = useCallback(() => {
+    setIsNotificationOpen(false);
+  }, []);
+
+  const openNotification = useCallback(() => {
+    setIsNotificationOpen(true);
+  }, []);
+
+  return {
+    isNotificationOpen,
+    notifications,
+    hasUnreadNotifications,
+    isLoading: isLoadingRef.current,
+    error,
+    toggleNotification,
+    closeNotification,
+    openNotification,
+    fetchNotifications,
+    markAsRead,
   };
 };
